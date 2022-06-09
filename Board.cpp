@@ -1,5 +1,6 @@
 #include "Board.h"
 
+#include <algorithm>
 #include <iostream>
 
 void Board::initialize_print_map() {
@@ -48,9 +49,38 @@ void Board::add(char piece_id, int row, int col) {
             break;
         default:
             ptr = nullptr;
-            cout << "Board::add; Illegal piece type\n";
+            cout << "Board::add; Illegal piece type = " << piece_id << "\n";
     }
     piece_array.at(row).at(col) = ptr;
+}
+
+//intended usage is for setting values of a board-sized 2d vector to 0
+template <typename Board, typename val_t>
+void fill_board(Board& board, val_t val) {
+    for (auto& row : board) {
+        fill(row.begin(), row.end(), val);
+    }
+}
+
+//clears board then sets board to state described by FEN notation
+//if ill-formed notation, behavior is undefined
+void Board::set_board(const string& FEN) {
+    fill_board(piece_array, nullptr);
+    fill_board(move_array, false);
+    auto it = FEN.begin();
+
+    for (int row = 0; row < BOARD_HEIGHT; ++row) {
+        for (int col = 0; col < BOARD_WIDTH; ++col) {
+            if (isdigit(*it)) {
+                col += (*it - '1');
+                ++it;
+            }
+            else {
+                add(*it++, row, col);
+            }
+        }
+        ++it; //expected to be '/'
+    }
 }
 
 void Board::print_board() {
@@ -78,8 +108,8 @@ void Board::print_board() {
 
 Board::~Board() {
     for (auto& row : piece_array) {
-        for (auto col : row) { //At the moment, I don't actually know what happens if you delete a reference-to-pointer
-            delete col;
+        for (auto& piece : row) {
+            delete piece;
         }
     }
 }

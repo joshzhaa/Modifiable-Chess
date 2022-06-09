@@ -1,8 +1,13 @@
 #include "Board.h"
 
+#include <string>
+
+const string EXAMPLE_FEN = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
+const string DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 int main() {
     Board b;
-    b.add('K', 3, 3);b.add('K', 2, 3);b.add('K', 1, 3);b.add('K', 0, 3);b.add('K', 4, 3);b.add('K', 5, 3);b.add('K', 6, 3);
+    b.set_board(EXAMPLE_FEN);
     b.print_board();
     return 0;
 }

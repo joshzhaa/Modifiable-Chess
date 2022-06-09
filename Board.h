@@ -27,6 +27,7 @@ class Board {
         Board();
 
         void add(char piece_id, int row, int col);
+        void set_board(const string& FEN);
         void print_board();
 
         ~Board();

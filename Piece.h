@@ -82,7 +82,7 @@ class Knight : public Piece {
 class Pawn : public Piece {
     public:
         Pawn() : Piece(true, 'p') {}
-        Pawn(bool is_white) : Piece(is_white, 'n') {}
+        Pawn(bool is_white) : Piece(is_white, 'p') {}
         
         virtual void show_moves(vector<vector<bool>>& move_array, int row, int col);
 

@@ -1,4 +1,4 @@
-//Class declaration for a class representing the Board, which includes all the pieces
+//Class declaration for a class representing the Board
 
 #ifndef __BOARD_H__
 #define __BOARD_H__
@@ -12,6 +12,11 @@
 #define BOARD_WIDTH 8
 #define BOARD_HEIGHT 8
 
+//Class stores pieces on the board geometrically inside a vector of the same shape as the board
+//Board uses a (row, col) format such as (3, 4) to identify squares as a typical 2D array in computer science
+//as opposed to the chess convention of rank and file
+//Board can be in 2 states, has_selection = true or = false. Either a square has just been selected
+//or a move has just been made (equivalent to starting state)
 class Board {
     private:
         //array containing piece objects, nullptr represents empty
@@ -28,8 +33,12 @@ class Board {
 
         void add(char piece_id, int row, int col);
         void set_board(const string& FEN);
+       
+        void select(int row, int col);
+        bool move(int row, int col);
         void print_board();
-
+        bool has_selection();
+       
         ~Board();
 };
 

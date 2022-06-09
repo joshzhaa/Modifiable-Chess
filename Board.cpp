@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 
+//Currently useless as terminal doesn't support special chess symbol unicode characters
 void Board::initialize_print_map() {
     print_map['K'] = "\u2654";
     print_map['Q'] = "\u2655";
@@ -83,14 +84,43 @@ void Board::set_board(const string& FEN) {
     }
 }
 
+void Board::select(int row, int col) {
+    selection.first = row;
+    selection.second = col;
+    Piece* ptr = nullptr;
+
+    try {
+        ptr = piece_array.at(row).at(col);
+    }
+    catch (const out_of_range& oor) {
+        cout << "Board::select; selected out of board\n";
+    }
+
+    if (ptr) {
+        fill_board(move_array, false); 
+    }
+    else {
+        ptr->show_moves(move_array, row, col);
+    }
+}
+
+//Attempts to move selected piece to position defined by parameters
+//Returns true and updates piece_array if successful
+//Returns false and changes nothing if unsuccessful
+bool Board::move(int row, int col) {
+    return false;
+}
+
 void Board::print_board() {
+    int rank = BOARD_HEIGHT;
     for (auto& row : piece_array) {
+        cout << "   ";
         for (size_t i = 0; i < row.size(); ++i) {
             cout << "+---";
         }
-        cout << "+\n";
+        cout << "+\n " << rank-- << " ";
         for (auto& piece : row) {
-            cout << '|'; 
+            cout << "|"; 
             if (piece) {
                 cout << ' ' << /*print_map.at(*/piece->get_id()/*)*/ << ' ';
             }
@@ -100,10 +130,19 @@ void Board::print_board() {
         }
         cout << "|\n";
     }
+    cout << "   ";
     for (size_t i = 0; i < BOARD_WIDTH; ++i) {
         cout << "+---";
     }
-    cout << "+\n";
+    cout << "+\n  ";
+    for (size_t i = 0; i < BOARD_WIDTH; ++i) {
+        cout << "   " << char('a' + i);
+    }
+    cout << "\n";
+}
+
+bool Board::has_selection() {
+    return selection.first != -1 || selection.second != -1;
 }
 
 Board::~Board() {

@@ -27,18 +27,21 @@ class Board {
         pair<int, int> selection; //selection = (-1, -1) is a special value which means no selection
         
         unordered_map<char, string> print_map; //string because char is not big enough for unicode character
-        void initialize_print_map();
+        void initialize_print_map() noexcept;
     public:
         Board(); //Constructs an empty board
         Board(const string& FEN); //Calls set_board(FEN)
 
-        void add(char piece_id, int row, int col);
-        void set_board(const string& FEN);
+        void add(char piece_id, int row, int col) noexcept;
+        void set_board(const string& FEN) ;
        
         bool select(int row, int col);
+        void reset_selection() noexcept;
         bool move(int row, int col);
-        void print_board();
-        bool has_selection();
+        bool has_selection() const noexcept;
+
+        char get_piece(int row, int col) const;
+        void print_board() const noexcept;
        
         ~Board();
 };

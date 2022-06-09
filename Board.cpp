@@ -4,7 +4,7 @@
 #include <iostream>
 
 //Currently useless as terminal doesn't support special chess symbol unicode characters
-void Board::initialize_print_map() {
+void Board::initialize_print_map() noexcept {
     print_map['K'] = "\u2654";
     print_map['Q'] = "\u2655";
     print_map['R'] = "\u2656";
@@ -28,7 +28,7 @@ Board::Board(const string& FEN) : piece_array(BOARD_HEIGHT, vector<Piece*>(BOARD
     selection(-1, -1) { /*initialize_print_map();*/ set_board(FEN); }
 
 
-void Board::add(char piece_id, int row, int col) {
+void Board::add(char piece_id, int row, int col) noexcept { //apparently new can throw, but would it actually?
     Piece* ptr;
     bool is_white = false;
     if (isupper(piece_id)) is_white = true;
@@ -62,7 +62,7 @@ void Board::add(char piece_id, int row, int col) {
 
 //intended usage is for setting values of a board-sized 2d vector to 0
 template <typename Board, typename val_t>
-void fill_board(Board& board, val_t val) {
+void fill_board(Board& board, val_t val) noexcept {
     for (auto& row : board) {
         fill(row.begin(), row.end(), val);
     }
@@ -89,8 +89,8 @@ void Board::set_board(const string& FEN) {
     }
 }
 
-void reset_selection(pair<int, int>& s) {
-    s.first = s.second = -1;
+void Board::reset_selection() noexcept {
+    selection.first = selection.second = -1;
 }
 
 //Attempts to select piece at position defined by parameters
@@ -105,14 +105,13 @@ bool Board::select(int row, int col) {
     }
     catch (const out_of_range& oor) {
         ptr = nullptr;
-        cout << "Board::select; selected out of board\n";
     }
 
     if (ptr) {
         ptr->show_moves(move_array, row, col);
     }
     else {
-        reset_selection(selection);
+        reset_selection();
         fill_board(move_array, false); 
     
     }
@@ -121,30 +120,46 @@ bool Board::select(int row, int col) {
 
 //Attempts to move selected piece to position defined by parameters
 //Returns true and updates piece_array and selection attribute if successful
-//Returns false and updates nothing
+//Returns false and updates nothing if unsuccessful
 bool Board::move(int row, int col) {
-    selection.first = selection.second = -1;
+    piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);
+    piece_array.at(selection.first).at(selection.second) = nullptr;
+    reset_selection();
+    fill_board(move_array, false);
     return true;
 }
 
-void Board::print_board() {
+char Board::get_piece(int row, int col) const {
+    Piece* ptr = piece_array.at(row).at(col);
+    if (!ptr) {
+        throw invalid_argument("Board::get_piece; empty square");
+    }
+    return ptr->get_id();
+}
+
+//Prints board to cout using standard ASCII characters
+void Board::print_board() const noexcept {
+
     int rank = BOARD_HEIGHT;
     for (auto& row : piece_array) {
-        cout << "   ";
-        for (size_t i = 0; i < row.size(); ++i) {
+        cout << "   "; //left margin
+        for (size_t i = 0; i < row.size(); ++i) { //space border
             cout << "+---";
         }
-        cout << "+\n " << rank-- << " ";
-        for (auto& piece : row) {
-            cout << "|"; 
-            if (piece) {
-                cout << ' ' << /*print_map.at(*/piece->get_id()/*)*/ << ' ';
+        cout << "+\n " << rank-- << " "; //end of border and beginning of next line margin
+        for (size_t i = 0; i < row.size(); ++i) { //fill in squares
+            Piece* piece = row.at(i);
+            char highlight = move_array.at(BOARD_HEIGHT - rank - 1).at(i) ? '*' : ' ';
+
+            cout << "|"; //space border
+            if (piece) { //if a piece is occupying
+                cout << highlight << /*print_map.at(*/piece->get_id()/*)*/ << highlight; 
             }
-            else {
-                cout << "   ";
+            else { //if there is no occupying piece
+                cout << ' ' << highlight << ' ';
             }
         }
-        cout << "|\n";
+        cout << "|\n"; //space border
     }
     cout << "   ";
     for (size_t i = 0; i < BOARD_WIDTH; ++i) {
@@ -157,11 +172,11 @@ void Board::print_board() {
     cout << "\n";
 }
 
-bool Board::has_selection() {
+bool Board::has_selection() const noexcept{
     return selection.first != -1 || selection.second != -1;
 }
 
-Board::~Board() {
+Board::~Board() noexcept {
     for (auto& row : piece_array) {
         for (auto& piece : row) {
             delete piece;

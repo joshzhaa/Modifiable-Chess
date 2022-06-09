@@ -3,7 +3,6 @@
 #include <utility>
 #include <iostream> //TODO: remove
 
-//Piece
 void Piece::mark_at(vector<vector<bool>>& move_array, int row, int col) {
     try {
         move_array.at(row).at(col) = true;
@@ -22,14 +21,58 @@ Piece::Piece(bool is_white, char id_in) {
     }
 }
 
-//King
-void King::show_moves(vector<vector<bool>>& move_array, pair<int, int>& pos) {
+void King::show_moves(vector<vector<bool>>& move_array, int row, int col) {
     for (int i = -1; i <= 1; ++i) {
         for (int j = -1; j <= 1; ++j) {
-            mark_at(move_array, pos.first, pos.second);
+            mark_at(move_array, row, col);
         }
     }
-    move_array.at(pos.first).at(pos.second) = false;
+    move_array.at(row).at(col) = false;
+}
+
+void Queen::show_moves(vector<vector<bool>>& move_array, int row, int col) {
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            mark_at(move_array, row, col);
+        }
+    }
+    move_array.at(row).at(col) = false;
+}
+
+void Rook::show_moves(vector<vector<bool>>& move_array, int row, int col) {
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            mark_at(move_array, row, col);
+        }
+    }
+    move_array.at(row).at(col) = false;
+}
+
+void Bishop::show_moves(vector<vector<bool>>& move_array, int row, int col) {
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            mark_at(move_array, row, col);
+        }
+    }
+    move_array.at(row).at(col) = false;
+}
+
+void Knight::show_moves(vector<vector<bool>>& move_array, int row, int col) {
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            mark_at(move_array, row, col);
+        }
+    }
+    move_array.at(row).at(col) = false;
+}
+
+void Pawn::show_moves(vector<vector<bool>>& move_array, int row, int col) {
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
+            mark_at(move_array, row, col);
+        }
+    }
+    move_array.at(row).at(col) = false;
 }
 
 

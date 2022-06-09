@@ -25,7 +25,11 @@ class Board {
         void initialize_print_map();
     public:
         Board();
+
+        void add(char piece_id, int row, int col);
         void print_board();
+
+        ~Board();
 };
 
 

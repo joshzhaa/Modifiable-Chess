@@ -24,19 +24,69 @@ class Piece {
         Piece(bool is_white, char id_in);
         
         char get_id() { return id; }
-        virtual void show_moves() = 0;
+        virtual void show_moves(vector<vector<bool>>& move_array, int row, int col) = 0;
+
+        virtual ~Piece() {};
 };
 
-//Represents the King
 class King : public Piece {
     public:
         King() : Piece(true, 'k') {}
         King(bool is_white) : Piece(is_white, 'k') {}
         
-        void show_moves(vector<vector<bool>>& move_array, pair<int, int>& pos);
+        virtual void show_moves(vector<vector<bool>>& move_array, int row, int col);
+        
+        virtual ~King() {}
 };
 
+class Queen : public Piece {
+    public:
+        Queen() : Piece(true, 'q') {}
+        Queen(bool is_white) : Piece(is_white, 'q') {}
+        
+        virtual void show_moves(vector<vector<bool>>& move_array, int row, int col);
+        
+        virtual ~Queen() {}
+};
 
+class Rook : public Piece {
+    public:
+        Rook() : Piece(true, 'r') {}
+        Rook(bool is_white) : Piece(is_white, 'r') {}
+        
+        virtual void show_moves(vector<vector<bool>>& move_array, int row, int col);
+    
+        virtual ~Rook() {}
+};
 
+class Bishop : public Piece {
+    public:
+        Bishop() : Piece(true, 'b') {}
+        Bishop(bool is_white) : Piece(is_white, 'b') {}
+        
+        virtual void show_moves(vector<vector<bool>>& move_array, int row, int col);
+
+        virtual ~Bishop() {}
+};
+
+class Knight : public Piece {
+    public:
+        Knight() : Piece(true, 'n') {}
+        Knight(bool is_white) : Piece(is_white, 'n') {}
+        
+        virtual void show_moves(vector<vector<bool>>& move_array, int row, int col);
+
+        virtual ~Knight() {}
+};
+
+class Pawn : public Piece {
+    public:
+        Pawn() : Piece(true, 'p') {}
+        Pawn(bool is_white) : Piece(is_white, 'n') {}
+        
+        virtual void show_moves(vector<vector<bool>>& move_array, int row, int col);
+
+        virtual ~Pawn() {}
+};
 
 #endif

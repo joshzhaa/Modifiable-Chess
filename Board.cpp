@@ -21,7 +21,12 @@ void Board::initialize_print_map() {
 
 Board::Board() : piece_array(BOARD_HEIGHT, vector<Piece*>(BOARD_WIDTH, nullptr)),
     move_array(BOARD_HEIGHT, vector<bool>(BOARD_WIDTH, false)),
-    selection(-1, -1) { initialize_print_map(); }
+    selection(-1, -1) { /*initialize_print_map();*/ }
+
+Board::Board(const string& FEN) : piece_array(BOARD_HEIGHT, vector<Piece*>(BOARD_WIDTH, nullptr)),
+    move_array(BOARD_HEIGHT, vector<bool>(BOARD_WIDTH, false)),
+    selection(-1, -1) { /*initialize_print_map();*/ set_board(FEN); }
+
 
 void Board::add(char piece_id, int row, int col) {
     Piece* ptr;
@@ -84,7 +89,13 @@ void Board::set_board(const string& FEN) {
     }
 }
 
-void Board::select(int row, int col) {
+void reset_selection(pair<int, int>& s) {
+    s.first = s.second = -1;
+}
+
+//Attempts to select piece at position defined by parameters
+//Returns true if the selection is valid, false if invalid
+bool Board::select(int row, int col) {
     selection.first = row;
     selection.second = col;
     Piece* ptr = nullptr;
@@ -93,22 +104,27 @@ void Board::select(int row, int col) {
         ptr = piece_array.at(row).at(col);
     }
     catch (const out_of_range& oor) {
+        ptr = nullptr;
         cout << "Board::select; selected out of board\n";
     }
 
     if (ptr) {
-        fill_board(move_array, false); 
-    }
-    else {
         ptr->show_moves(move_array, row, col);
     }
+    else {
+        reset_selection(selection);
+        fill_board(move_array, false); 
+    
+    }
+    return ptr;
 }
 
 //Attempts to move selected piece to position defined by parameters
-//Returns true and updates piece_array if successful
-//Returns false and changes nothing if unsuccessful
+//Returns true and updates piece_array and selection attribute if successful
+//Returns false and updates nothing
 bool Board::move(int row, int col) {
-    return false;
+    selection.first = selection.second = -1;
+    return true;
 }
 
 void Board::print_board() {

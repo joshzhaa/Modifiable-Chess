@@ -29,12 +29,13 @@ class Board {
         unordered_map<char, string> print_map; //string because char is not big enough for unicode character
         void initialize_print_map();
     public:
-        Board();
+        Board(); //Constructs an empty board
+        Board(const string& FEN); //Calls set_board(FEN)
 
         void add(char piece_id, int row, int col);
         void set_board(const string& FEN);
        
-        void select(int row, int col);
+        bool select(int row, int col);
         bool move(int row, int col);
         void print_board();
         bool has_selection();
@@ -42,5 +43,8 @@ class Board {
         ~Board();
 };
 
+class Freemove_Board {
+
+};
 
 #endif

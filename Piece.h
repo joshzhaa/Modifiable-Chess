@@ -13,8 +13,8 @@ class Piece {
         char id; //char piece id in FEN format
 
     protected:
-        //marks a location on move_array as valid to move into, if out of bounds does nothing
-        void mark_at(vector<vector<bool>>& move_array, int row, int col);
+        //marks a location on move_array as valid to move into, if out of bounds only returns false
+        bool mark_at(vector<vector<bool>>& move_array, int row, int col);
 
     public:
         Piece() { id = 0; } //default constructor creates an Empty piece
@@ -80,11 +80,15 @@ class Knight : public Piece {
 };
 
 class Pawn : public Piece {
+    private:
+        bool has_moved = false;
+
     public:
         Pawn() : Piece(true, 'p') {}
         Pawn(bool is_white) : Piece(is_white, 'p') {}
         
         virtual void show_moves(vector<vector<bool>>& move_array, int row, int col);
+        void move() { has_moved = true; }
 
         virtual ~Pawn() {}
 };

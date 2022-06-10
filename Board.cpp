@@ -84,10 +84,7 @@ void Board::reset_selection() noexcept {
 //Attempts to select piece at position defined by parameters
 //Returns true if the selection is valid, false if invalid
 bool Board::select(int row, int col) {
-    selection.first = row;
-    selection.second = col;
     Piece* ptr = nullptr;
-
     try {
         ptr = piece_array.at(row).at(col);
     }
@@ -97,11 +94,12 @@ bool Board::select(int row, int col) {
 
     if (ptr) {
         ptr->show_moves(this, row, col);
+        selection.first = row;
+        selection.second = col;
     }
     else {
         reset_selection();
         fill_board(move_array, false); 
-    
     }
     return ptr;
 }
@@ -162,8 +160,13 @@ bool Board::has_selection() const noexcept {
     return selection.first != -1 || selection.second != -1;
 }
 
-bool Board::is_occupied(int row, int col) const {
-    return piece_array.at(row).at(col);
+bool Board::is_occupied(int row, int col) const noexcept {
+    try {
+        return piece_array.at(row).at(col);
+    }
+    catch (const out_of_range& oor) {
+        return false;
+    }
 }
 
 char Board::get_piece(int row, int col) const {

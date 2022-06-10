@@ -51,7 +51,7 @@ class Board {
         bool move(int row, int col);
         
         bool has_selection() const noexcept;
-        bool is_occupied(int row, int col) const;
+        bool is_occupied(int row, int col) const noexcept;
         char get_piece(int row, int col) const;
         
         void print_board() const noexcept;

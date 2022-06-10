@@ -131,7 +131,16 @@ void Knight::show_moves(Board* board, int row, int col) {
 void Pawn::show_moves(Board* board, int row, int col) {
     int distance = has_moved ? 1 : 2;
     int direction = isupper(get_id()) ? -1 : 1;
-    mark_at(board, row + (direction * distance), col);
+    if (!board->is_occupied(row + (direction * distance), col)) mark_at(board, row + (direction * distance), col);
+    //capture right
+    int cap_row = row + direction;
+    int cap_col = col + 1;
+    if (board->is_occupied(cap_row, cap_col) && isupper(board->get_piece(cap_row, cap_col)) != isupper(get_id()))
+        mark_at(board, cap_row, cap_col);
+    //capture left
+    cap_col = col - 1;
+    if (board->is_occupied(cap_row, cap_col) && isupper(board->get_piece(cap_row, cap_col)) != isupper(get_id()))
+        mark_at(board, cap_row, cap_col);
 }
 
 

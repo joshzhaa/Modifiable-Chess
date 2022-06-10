@@ -73,6 +73,10 @@ void Board::set_board(const string& FEN) {
     }
 }
 
+void Board::set_rules(bool setting) {
+    enforce_rules = setting;
+}
+
 void Board::reset_selection() noexcept {
     selection.first = selection.second = -1;
 }
@@ -106,10 +110,14 @@ bool Board::select(int row, int col) {
 //Returns true and updates piece_array and selection attribute if successful
 //Returns false and updates nothing if unsuccessful
 bool Board::move(int row, int col) {
+    if (enforce_rules && !move_array.at(row).at(col)) {
+        return false;
+    }
     piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);
     piece_array.at(selection.first).at(selection.second) = nullptr;
     reset_selection();
     fill_board(move_array, false);
+    piece_array.at(row).at(col)->move(); //tell piece that it has been moved
     return true;
 }
 

@@ -42,12 +42,6 @@ void console_play(Board* board) {
         if (command.find("quit") != string::npos) break;
 
         pair<int, int> square = parse_selection(command);
-        /*try {
-            cout << "Selected " << board->get_piece(square.first, square.second) << " at " << cmd << "\n";
-        }
-        catch(...) {
-            cout << "Invalid Square Selection!\n"
-        }*/
         if (!(square.first == -1 && square.second == -1)) {
             if (board->has_selection()) {
                 if (board->move(square.first, square.second)) message = SELECTION_REQUEST;
@@ -61,6 +55,7 @@ void console_play(Board* board) {
 
 int main() {
     Board* b = new Board(EXAMPLE_FEN);
+    b->set_rules(true);
     console_play(b);
     delete b;
     return 0;

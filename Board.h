@@ -31,6 +31,8 @@ class Board {
         //Position of user's most recently selected square
         pair<int, int> selection; //selection = (-1, -1) is a special value which means no selection
         
+        bool enforce_rules = false;
+
         unordered_map<char, string> print_map; //string because char is not big enough for unicode character
         void initialize_print_map() noexcept;
         
@@ -41,7 +43,8 @@ class Board {
         Board(const string& FEN); //Calls set_board(FEN)
 
         void add(char piece_id, int row, int col) noexcept;
-        void set_board(const string& FEN) ;
+        void set_board(const string& FEN);
+        void set_rules(bool setting);
        
         bool select(int row, int col);
         void reset_selection() noexcept;
@@ -54,10 +57,6 @@ class Board {
         void print_board() const noexcept;
        
         ~Board();
-};
-
-class Freemove_Board {
-
 };
 
 #endif

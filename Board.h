@@ -8,9 +8,14 @@
 #include <unordered_map>
 #include <vector>
 #include <utility>
+#include <string>
 
 #define BOARD_WIDTH 8
 #define BOARD_HEIGHT 8
+
+using namespace std;
+
+class Piece; //forward declaration
 
 //Class stores pieces on the board geometrically inside a vector of the same shape as the board
 //Board uses a (row, col) format such as (3, 4) to identify squares as a typical 2D array in computer science
@@ -28,6 +33,9 @@ class Board {
         
         unordered_map<char, string> print_map; //string because char is not big enough for unicode character
         void initialize_print_map() noexcept;
+        
+        //Allows piece to mark its own possible moves by accessing move_array
+        friend class Piece;
     public:
         Board(); //Constructs an empty board
         Board(const string& FEN); //Calls set_board(FEN)
@@ -38,9 +46,11 @@ class Board {
         bool select(int row, int col);
         void reset_selection() noexcept;
         bool move(int row, int col);
+        
         bool has_selection() const noexcept;
-
+        bool is_occupied(int row, int col) const;
         char get_piece(int row, int col) const;
+        
         void print_board() const noexcept;
        
         ~Board();

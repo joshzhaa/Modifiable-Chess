@@ -3,22 +3,6 @@
 #include <algorithm>
 #include <iostream>
 
-//Currently useless as terminal doesn't support special chess symbol unicode characters
-void Board::initialize_print_map() noexcept {
-    print_map['K'] = "\u2654";
-    print_map['Q'] = "\u2655";
-    print_map['R'] = "\u2656";
-    print_map['B'] = "\u2657";
-    print_map['N'] = "\u2658";
-    print_map['P'] = "\u2659";
-    print_map['k'] = "\u265A";
-    print_map['q'] = "\u265B";
-    print_map['r'] = "\u265C";
-    print_map['b'] = "\u265D";
-    print_map['n'] = "\u265E";
-    print_map['p'] = "\u265F";
-}
-
 Board::Board() : piece_array(BOARD_HEIGHT, vector<Piece*>(BOARD_WIDTH, nullptr)),
     move_array(BOARD_HEIGHT, vector<bool>(BOARD_WIDTH, false)),
     selection(-1, -1) { /*initialize_print_map();*/ }
@@ -108,7 +92,7 @@ bool Board::select(int row, int col) {
     }
 
     if (ptr) {
-        ptr->show_moves(move_array, row, col);
+        ptr->show_moves(this, row, col);
     }
     else {
         reset_selection();
@@ -129,13 +113,7 @@ bool Board::move(int row, int col) {
     return true;
 }
 
-char Board::get_piece(int row, int col) const {
-    Piece* ptr = piece_array.at(row).at(col);
-    if (!ptr) {
-        throw invalid_argument("Board::get_piece; empty square");
-    }
-    return ptr->get_id();
-}
+
 
 //Prints board to cout using standard ASCII characters
 void Board::print_board() const noexcept {
@@ -172,8 +150,20 @@ void Board::print_board() const noexcept {
     cout << "\n";
 }
 
-bool Board::has_selection() const noexcept{
+bool Board::has_selection() const noexcept {
     return selection.first != -1 || selection.second != -1;
+}
+
+bool Board::is_occupied(int row, int col) const {
+    return piece_array.at(row).at(col);
+}
+
+char Board::get_piece(int row, int col) const {
+    Piece* ptr = piece_array.at(row).at(col);
+    if (!ptr) {
+        throw invalid_argument("Board::get_piece; empty square");
+    }
+    return ptr->get_id();
 }
 
 Board::~Board() noexcept {
@@ -182,4 +172,20 @@ Board::~Board() noexcept {
             delete piece;
         }
     }
+}
+
+//Currently useless as terminal doesn't support special chess symbol unicode characters
+void Board::initialize_print_map() noexcept {
+    print_map['K'] = "\u2654";
+    print_map['Q'] = "\u2655";
+    print_map['R'] = "\u2656";
+    print_map['B'] = "\u2657";
+    print_map['N'] = "\u2658";
+    print_map['P'] = "\u2659";
+    print_map['k'] = "\u265A";
+    print_map['q'] = "\u265B";
+    print_map['r'] = "\u265C";
+    print_map['b'] = "\u265D";
+    print_map['n'] = "\u265E";
+    print_map['p'] = "\u265F";
 }

@@ -10,7 +10,7 @@ const string EXAMPLE_FEN = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b 
 const string DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 //Parsing a selection
-pair<int, int> parse_selection(const string& cmd, const Board *board) noexcept {
+pair<int, int> parse_selection(const string& cmd) noexcept {
     char rank, file;
     int row, col;
 
@@ -41,7 +41,7 @@ void console_play(Board* board) {
         cin >> command;
         if (command.find("quit") != string::npos) break;
 
-        pair<int, int> square = parse_selection(command, board);
+        pair<int, int> square = parse_selection(command);
         /*try {
             cout << "Selected " << board->get_piece(square.first, square.second) << " at " << cmd << "\n";
         }

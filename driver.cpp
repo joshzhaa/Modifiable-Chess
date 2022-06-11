@@ -69,7 +69,7 @@ void console_play(Board* board) {
 
 int main() {
     Board* b = new Board(EXAMPLE_FEN);
-    b->set_rules(true);
+    //b->set_rules(true);
     console_play(b);
     delete b;
     return 0;

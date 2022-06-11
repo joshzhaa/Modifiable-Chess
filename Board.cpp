@@ -137,6 +137,15 @@ bool Board::move(int row, int col) {
         piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);
         piece_array.at(selection.first).at(selection.second) = nullptr;
     }
+    //check if pawn needs promotion
+    if (row == BOARD_HEIGHT - 1 && piece_array.at(row).at(col)->get_id() == 'p') {
+        delete piece_array.at(row).at(col);
+        add('q', row, col);
+    }
+    if (row == 0 && piece_array.at(row).at(col)->get_id() == 'P') {
+        delete piece_array.at(row).at(col);
+        add('Q', row, col);
+    }
     reset_selection();
     piece_array.at(row).at(col)->move(); //tell piece that it has been moved
     turn = turn == Player::white ? Player::black : Player::white;

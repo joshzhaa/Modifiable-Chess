@@ -48,7 +48,7 @@ void King::show_moves(Board* board, int row, int col) const noexcept {
     }
     //castling procedure:
     //currently, 1. neither piece has moved, rook on the same rank, no pieces blocking
-    if (!has_moved) { //this if requires king to be at top or bottom rank
+    if (!has_moved && board->allow_castling) {
         is_unmoved_rook comp;
         //scan right
         auto right_it = board->piece_array.at(row).begin() + col + 1; //starts one right of king

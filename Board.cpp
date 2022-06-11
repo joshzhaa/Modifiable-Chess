@@ -111,11 +111,20 @@ bool Board::move(int row, int col) {
     if (enforce_rules && !move_array.at(row).at(col)) {
         return false;
     }
-    piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);
-    piece_array.at(selection.first).at(selection.second) = nullptr;
+    if (allow_castling && tolower(piece_array.at(selection.first).at(selection.second)->get_id()) == 'k' && 
+    (col - selection.second == 2 || col - selection.second == -2)) {//detect castling, only move that moves 2 pieces
+        piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);
+        piece_array.at(selection.first).at(selection.second) = nullptr;
+        //TODO: finish castling routine
+    }
+    else {
+        piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);
+        piece_array.at(selection.first).at(selection.second) = nullptr;
+    }
     reset_selection();
     fill_board(move_array, false);
     piece_array.at(row).at(col)->move(); //tell piece that it has been moved
+
     return true;
 }
 
@@ -175,6 +184,14 @@ char Board::get_piece(int row, int col) const {
         throw invalid_argument("Board::get_piece; empty square");
     }
     return ptr->get_id();
+}
+
+size_t Board::get_height() const noexcept {
+    return piece_array.size();
+}
+
+size_t Board::get_width() const noexcept {
+    return piece_array[0].size();
 }
 
 Board::~Board() noexcept {

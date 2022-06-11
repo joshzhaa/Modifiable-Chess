@@ -31,13 +31,17 @@ class Board {
         //Position of user's most recently selected square
         pair<int, int> selection; //selection = (-1, -1) is a special value which means no selection
         
+        //game options
         bool enforce_rules = false;
+        bool allow_castling = true;
 
         unordered_map<char, string> print_map; //string because char is not big enough for unicode character
         void initialize_print_map() noexcept;
         
         //Allows piece to mark its own possible moves by accessing move_array
+        //More crucially facilitates castling
         friend class Piece;
+        friend void King::show_moves(Board*, int, int) const; 
     public:
         Board(); //Constructs an empty board
         Board(const string& FEN); //Calls set_board(FEN)
@@ -51,8 +55,11 @@ class Board {
         bool move(int row, int col);
         
         bool has_selection() const noexcept;
+        bool has_moved(int row, int col) const;
         bool is_occupied(int row, int col) const noexcept;
         char get_piece(int row, int col) const;
+        size_t get_width() const noexcept;
+        size_t get_height() const noexcept;
         
         void print_board() const noexcept;
        

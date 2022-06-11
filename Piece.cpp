@@ -1,22 +1,25 @@
 #include "Piece.h"
+#include "Board.h"
 
-#include <utility>
+#include <algorithm> //for find_if
+#include <utility> //for pair
 
 //Determines the max distance a Q, R, or B can move
-#define MAX_DISTANCE 20
+#define MAX_DISTANCE 100
 
-bool Piece::mark_at(Board* board, int row, int col) {
-    try {
-        bool occupancy = board->is_occupied(row, col);
-        if (!occupancy || isupper(id) != isupper(board->get_piece(row, col))) {
+bool Piece::mark_at(Board* board, int row, int col) const noexcept {
+    bool occupancy = board->is_occupied(row, col);
+    if (!occupancy || isupper(id) != isupper(board->get_piece(row, col))) {
+        try {
             board->move_array.at(row).at(col) = true;
         }
-        return occupancy;
+        catch (const out_of_range &oor) {
+            return false;
+        }
     }
-    catch (const out_of_range &oor) {
-        return false;
-    }
+    return occupancy;
 }
+
 
 Piece::Piece(bool is_white, char id_in) {
     if (is_white) {
@@ -27,7 +30,7 @@ Piece::Piece(bool is_white, char id_in) {
     }
 }
 
-void King::show_moves(Board* board, int row, int col) {
+void King::show_moves(Board* board, int row, int col) const noexcept {
     for (int i = -1; i <= 1; ++i) {
         for (int j = -1; j <= 1; ++j) {
             if (i || j) {
@@ -35,9 +38,24 @@ void King::show_moves(Board* board, int row, int col) {
             }
         }
     }
+    //castling procedure:
+    //currently, 1. neither piece has moved, rook on the same rank, no pieces blocking
+    if (!has_moved) { //this if requires king to be at top or bottom rank
+        is_unmoved_rook comp;
+        //scan right
+        auto right_it = board->piece_array.at(row).begin() + col + 1; //starts one right of king
+        //find first not nullptr (first nonempty square)
+        auto found_right = find_if(right_it, board->piece_array.at(row).end(), [](Piece *ptr) { return ptr; });
+        if (comp(*found_right)) mark_at(board, row, col + 2);
+
+        //scan left
+        auto left_it = board->piece_array.at(row).rbegin() + (board->get_width() - col); //starts one left of king
+        auto found_left = find_if(left_it, board->piece_array.at(row).rend(), [](Piece *ptr) { return ptr; });
+        if (comp(*found_left)) mark_at(board, row, col - 2);
+    }
 }
 
-void Queen::show_moves(Board* board, int row, int col) {
+void Queen::show_moves(Board* board, int row, int col) const noexcept {
     int infinity = MAX_DISTANCE;
     //project down
     for (int i = 1; i < infinity; ++i) {
@@ -73,7 +91,7 @@ void Queen::show_moves(Board* board, int row, int col) {
     }
 }
 
-void Rook::show_moves(Board* board, int row, int col) {
+void Rook::show_moves(Board* board, int row, int col) const noexcept {
     int infinity = MAX_DISTANCE;
     //project down
     for (int i = 1; i < infinity; ++i) {
@@ -93,7 +111,7 @@ void Rook::show_moves(Board* board, int row, int col) {
     }
 }
 
-void Bishop::show_moves(Board* board, int row, int col) {
+void Bishop::show_moves(Board* board, int row, int col) const noexcept {
     int infinity = MAX_DISTANCE;
     //down right
     for (int i = 1; i < infinity; ++i) {
@@ -113,7 +131,7 @@ void Bishop::show_moves(Board* board, int row, int col) {
     }
 }
 
-void Knight::show_moves(Board* board, int row, int col) {
+void Knight::show_moves(Board* board, int row, int col) const noexcept {
     //top 2
     mark_at(board, row - 2, col + 1);
     mark_at(board, row - 2, col - 1);
@@ -128,7 +146,7 @@ void Knight::show_moves(Board* board, int row, int col) {
     mark_at(board, row - 1, col - 2);
 }
 
-void Pawn::show_moves(Board* board, int row, int col) {
+void Pawn::show_moves(Board* board, int row, int col) const noexcept {
     int distance = has_moved ? 1 : 2;
     int direction = isupper(get_id()) ? -1 : 1;
     if (!board->is_occupied(row + (direction * distance), col)) mark_at(board, row + (direction * distance), col);

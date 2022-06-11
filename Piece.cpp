@@ -29,6 +29,15 @@ Piece::Piece(bool is_white, char id_in) {
     }
 }
 
+Player Piece::get_control() const noexcept {
+    if (isupper(id)) {
+        return Player::white;
+    }
+    else {
+        return Player::black;
+    }
+}
+
 void King::show_moves(Board* board, int row, int col) const noexcept {
     for (int i = -1; i <= 1; ++i) {
         for (int j = -1; j <= 1; ++j) {

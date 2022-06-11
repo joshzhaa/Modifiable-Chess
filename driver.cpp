@@ -28,26 +28,40 @@ pair<int, int> parse_selection(const string& cmd) noexcept {
 }
 
 //User facing console messages
-const string SELECTION_REQUEST = "Select a square, or enter \"quit\"\n";
-const string MOVE_REQUEST = "Choose a move, or enter \"quit\"\n";
+const string SELECTION_REQUEST = "Select a square or enter \"quit\"\n";
+const string MOVE_REQUEST = "Input a move\n";
 
 //Function to facilitate a gameplay loop at the command line
 void console_play(Board* board) {
     string command;
-    string message = SELECTION_REQUEST;
     while(true) {
         board->print_board();
-        cout << message;
+        if (board->has_selection()) {
+            cout << MOVE_REQUEST;
+        }
+        else {
+            cout << SELECTION_REQUEST;
+        }
         cin >> command;
         if (command.find("quit") != string::npos) break;
 
         pair<int, int> square = parse_selection(command);
         if (!(square.first == -1 && square.second == -1)) {
             if (board->has_selection()) {
-                if (board->move(square.first, square.second)) message = SELECTION_REQUEST;
+                if (board->move(square.first, square.second)) {
+                    cout << "Moved to " << command << "\n";
+                }
+                else {
+                    cout << "Invalid Move!\n";
+                }
             }
             else {
-                if (board->select(square.first, square.second)) message = MOVE_REQUEST;
+                if (board->select(square.first, square.second)) {
+                    cout << "Selected " << board->get_piece(square.first, square.second) << "\n";
+                }
+                else {
+                    cout << "Invalid Selection!\n";
+                }
             }
         }
     } 

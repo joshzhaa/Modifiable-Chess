@@ -5,11 +5,11 @@
 
 Board::Board() : piece_array(BOARD_HEIGHT, vector<Piece*>(BOARD_WIDTH, nullptr)),
     move_array(BOARD_HEIGHT, vector<bool>(BOARD_WIDTH, false)),
-    selection(-1, -1) { /*initialize_print_map();*/ }
+    selection(-1, -1) {}
 
 Board::Board(const string& FEN) : piece_array(BOARD_HEIGHT, vector<Piece*>(BOARD_WIDTH, nullptr)),
     move_array(BOARD_HEIGHT, vector<bool>(BOARD_WIDTH, false)),
-    selection(-1, -1) { /*initialize_print_map();*/ set_board(FEN); }
+    selection(-1, -1) { set_board(FEN); }
 
 
 void Board::add(char piece_id, int row, int col) noexcept { //apparently new can throw, but would it actually?
@@ -73,11 +73,12 @@ void Board::set_board(const string& FEN) {
     }
 }
 
-void Board::set_rules(bool setting) {
+void Board::set_rules(bool setting) noexcept {
     enforce_rules = setting;
 }
 
 void Board::reset_selection() noexcept {
+    fill_board(move_array, false);
     selection.first = selection.second = -1;
 }
 
@@ -93,22 +94,23 @@ bool Board::select(int row, int col) {
     }
 
     if (ptr) {
+        if (ptr->get_control() != turn) return false;
         ptr->show_moves(this, row, col);
         selection.first = row;
         selection.second = col;
     }
     else {
         reset_selection();
-        fill_board(move_array, false); 
     }
     return ptr;
 }
 
 //Attempts to move selected piece to position defined by parameters
-//Returns true and updates piece_array and selection attribute if successful
+//Returns true and updates piece_array, selection attribute, and turn if successful
 //Returns false and updates nothing if unsuccessful
 bool Board::move(int row, int col) {
     if (enforce_rules && !move_array.at(row).at(col)) {
+        reset_selection();
         return false;
     }
     if (allow_castling && tolower(piece_array.at(selection.first).at(selection.second)->get_id()) == 'k' && 
@@ -130,16 +132,14 @@ bool Board::move(int row, int col) {
             piece_array.at(row).at(col + 1) = *found_it;
             *found_it = nullptr;
         }
-        
     }
     else {
         piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);
         piece_array.at(selection.first).at(selection.second) = nullptr;
     }
     reset_selection();
-    fill_board(move_array, false);
     piece_array.at(row).at(col)->move(); //tell piece that it has been moved
-
+    turn = turn == Player::white ? Player::black : Player::white;
     return true;
 }
 
@@ -218,7 +218,7 @@ Board::~Board() noexcept {
 }
 
 //Currently useless as terminal doesn't support special chess symbol unicode characters
-void Board::initialize_print_map() noexcept {
+/*void Board::initialize_print_map() noexcept {
     print_map['K'] = "\u2654";
     print_map['Q'] = "\u2655";
     print_map['R'] = "\u2656";
@@ -231,4 +231,4 @@ void Board::initialize_print_map() noexcept {
     print_map['b'] = "\u265D";
     print_map['n'] = "\u265E";
     print_map['p'] = "\u265F";
-}
+}*/

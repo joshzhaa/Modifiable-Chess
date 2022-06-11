@@ -7,6 +7,12 @@ using namespace std;
 
 class Board; //forward declaration
 
+//for encoding who controls a piece and whose turn it is
+enum class Player : char {
+    white = 0,
+    black = 1
+};
+
 //abstract base class from which King, Queen, etc. are derived
 class Piece {
     private:
@@ -28,6 +34,10 @@ class Piece {
         
         //returns the FEN format piece id
         char get_id() const noexcept { return id; }
+        
+        //returns the Player that controls this piece
+        Player get_control() const noexcept;
+
         //updates state of piece, K R and P keep track of whether they have moved yet
         virtual void move() noexcept {}
         virtual ~Piece() {};

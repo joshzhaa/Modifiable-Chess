@@ -20,7 +20,6 @@ bool Piece::mark_at(Board* board, int row, int col) const noexcept {
     return occupancy;
 }
 
-
 Piece::Piece(bool is_white, char id_in) {
     if (is_white) {
         id = (char) toupper(id_in);

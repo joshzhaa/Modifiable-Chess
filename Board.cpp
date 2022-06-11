@@ -113,9 +113,24 @@ bool Board::move(int row, int col) {
     }
     if (allow_castling && tolower(piece_array.at(selection.first).at(selection.second)->get_id()) == 'k' && 
     (col - selection.second == 2 || col - selection.second == -2)) {//detect castling, only move that moves 2 pieces
+        //move king
         piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);
         piece_array.at(selection.first).at(selection.second) = nullptr;
-        //TODO: finish castling routine
+        //move rook
+        is_unmoved_rook comp; 
+        if (col - selection.second == 2) { //if castle right
+            auto it = piece_array.at(row).begin() + selection.second + 1;
+            auto found_it = find_if(it, piece_array.at(row).end(), comp);
+            piece_array.at(row).at(col - 1) = *found_it;
+            *found_it = nullptr;
+        }
+        else { //if castle left
+            auto it = piece_array.at(row).rbegin() + selection.second;
+            auto found_it = find_if(it, piece_array.at(row).rend(), comp);
+            piece_array.at(row).at(col + 1) = *found_it;
+            *found_it = nullptr;
+        }
+        
     }
     else {
         piece_array.at(row).at(col) = piece_array.at(selection.first).at(selection.second);

@@ -53,7 +53,7 @@ class Board {
         bool select(int row, int col);
         void reset_selection() noexcept;
         bool move(int row, int col);
-        
+
         bool has_selection() const noexcept;
         bool has_moved(int row, int col) const;
         bool is_occupied(int row, int col) const noexcept;

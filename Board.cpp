@@ -9,7 +9,7 @@ Board::Board() : piece_array(BOARD_HEIGHT, vector<Piece*>(BOARD_WIDTH, nullptr))
 
 Board::Board(const string& FEN) : piece_array(BOARD_HEIGHT, vector<Piece*>(BOARD_WIDTH, nullptr)),
     move_array(BOARD_HEIGHT, vector<bool>(BOARD_WIDTH, false)),
-    selection(-1, -1) { set_board(FEN); }
+    selection(-1, -1) { initialize_print_map(); set_board(FEN); }
 
 
 void Board::add(char piece_id, int row, int col) noexcept { //apparently new can throw, but would it actually?
@@ -75,6 +75,13 @@ void Board::set_board(const string& FEN) {
 
 void Board::set_rules(bool setting) noexcept {
     enforce_rules = setting;
+}
+void Board::set_castling(bool setting) noexcept {
+    allow_castling = setting;
+}
+void Board::set_compatibility(bool setting) noexcept {
+    compatibility = setting;
+    initialize_print_map();
 }
 
 void Board::reset_selection() noexcept {
@@ -170,7 +177,7 @@ void Board::print_board() const noexcept {
 
             cout << "|"; //space border
             if (piece) { //if a piece is occupying
-                cout << highlight << /*print_map.at(*/piece->get_id()/*)*/ << highlight; 
+                cout << highlight << print_map.at(piece->get_id()) << highlight; 
             }
             else { //if there is no occupying piece
                 cout << ' ' << highlight << ' ';
@@ -226,18 +233,35 @@ Board::~Board() noexcept {
     }
 }
 
-//Currently useless as terminal doesn't support special chess symbol unicode characters
-/*void Board::initialize_print_map() noexcept {
-    print_map['K'] = "\u2654";
-    print_map['Q'] = "\u2655";
-    print_map['R'] = "\u2656";
-    print_map['B'] = "\u2657";
-    print_map['N'] = "\u2658";
-    print_map['P'] = "\u2659";
-    print_map['k'] = "\u265A";
-    print_map['q'] = "\u265B";
-    print_map['r'] = "\u265C";
-    print_map['b'] = "\u265D";
-    print_map['n'] = "\u265E";
-    print_map['p'] = "\u265F";
-}*/
+//Converts FEN ids to special chess symbol unicode characters
+//or causes print_map to do nothing
+void Board::initialize_print_map() noexcept {
+    if (compatibility) {
+        print_map['K'] = "K";
+        print_map['Q'] = "Q";
+        print_map['R'] = "R";
+        print_map['B'] = "B";
+        print_map['N'] = "N";
+        print_map['P'] = "P";
+        print_map['k'] = "k";
+        print_map['q'] = "q";
+        print_map['r'] = "r";
+        print_map['b'] = "b";
+        print_map['n'] = "n";
+        print_map['p'] = "p";
+    }
+    else {
+        print_map['K'] = "\u2654";
+        print_map['Q'] = "\u2655";
+        print_map['R'] = "\u2656";
+        print_map['B'] = "\u2657";
+        print_map['N'] = "\u2658";
+        print_map['P'] = "\u2659";
+        print_map['k'] = "\u265A";
+        print_map['q'] = "\u265B";
+        print_map['r'] = "\u265C";
+        print_map['b'] = "\u265D";
+        print_map['n'] = "\u265E";
+        print_map['p'] = "\u265F";
+    }
+}

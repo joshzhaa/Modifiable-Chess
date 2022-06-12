@@ -157,6 +157,7 @@ void Knight::show_moves(Board* board, int row, int col) const noexcept {
 void Pawn::show_moves(Board* board, int row, int col) const noexcept {
     int distance = has_moved ? 1 : 2;
     int direction = isupper(get_id()) ? -1 : 1;
+    if (!board->is_occupied(row + direction, col)) mark_at(board, row + direction, col);
     if (!board->is_occupied(row + (direction * distance), col)) mark_at(board, row + (direction * distance), col);
     //capture right
     int cap_row = row + direction;

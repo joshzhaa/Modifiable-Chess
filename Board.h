@@ -9,6 +9,8 @@
 #include <utility>
 #include <string>
 
+#include <unordered_map>
+
 #define BOARD_WIDTH 8
 #define BOARD_HEIGHT 8
 
@@ -35,7 +37,12 @@ class Board {
         //game options
         bool enforce_rules = false;
         bool allow_castling = true;
+        bool compatibility = true; //print_board only prints FEN ids instead of special chess characters
         
+        //Printing special chess symbol characters only works on some terminals
+        //Currently tested: VSCode terminal
+        unordered_map<char, string> print_map;
+        void initialize_print_map() noexcept;
         //Allows piece to mark its own possible moves by accessing move_array
         //More crucially facilitates castling
         friend class Piece;
@@ -48,6 +55,8 @@ class Board {
         void add(char piece_id, int row, int col) noexcept;
         void set_board(const string& FEN);
         void set_rules(bool setting) noexcept;
+        void set_castling(bool setting) noexcept;
+        void set_compatibility(bool setting) noexcept;
         //Gameplay
         bool select(int row, int col);
         void reset_selection() noexcept;

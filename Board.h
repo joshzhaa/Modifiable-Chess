@@ -40,13 +40,14 @@ class Board {
         bool compatibility = true; //print_board only prints FEN ids instead of special chess characters
         
         //Printing special chess symbol characters only works on some terminals
-        //Currently tested: VSCode terminal
+        //Only terminal I know to work is VSCode terminal
+        //Doesn't work: VS, WSL ubuntu
         unordered_map<char, string> print_map;
         void initialize_print_map() noexcept;
         //Allows piece to mark its own possible moves by accessing move_array
         //More crucially facilitates castling
         friend class Piece;
-        friend void King::show_moves(Board*, int, int) const; 
+        friend void King::show_moves(Board*, int, int) const noexcept; 
     public:
         Board(); //Constructs an empty board
         Board(const string& FEN); //Calls set_board(FEN)
@@ -62,7 +63,7 @@ class Board {
         void reset_selection() noexcept;
         bool move(int row, int col);
         //Get information about instance of Board
-        bool in_check(Player color) const noexcept;
+        bool in_check(Player color) noexcept;
         bool has_selection() const noexcept;
         bool has_moved(int row, int col) const;
         bool is_occupied(int row, int col) const noexcept;

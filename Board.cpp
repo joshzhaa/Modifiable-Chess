@@ -196,6 +196,37 @@ void Board::print_board() const noexcept {
     cout << "\n";
 }
 
+//iterates through all pieces to determine whether the position checks the player defined by color
+bool Board::in_check(Player color /*= turn*/) noexcept {
+    vector<vector<bool>> temp(move_array); //TODO: is necessary? store move_array to switch back later
+    //find appropriate king
+    char target_id = color == Player::white ? 'K' : 'k';
+    size_t kings_row = -1;
+    size_t kings_col = -1;
+    for (auto row = piece_array.begin(); row != piece_array.end(); ++row) {
+        auto found = find_if(row->begin(), row->end(), [ target_id ](Piece *ptr) {
+            if (ptr) return ptr->get_id() == target_id;
+            return false;
+        });
+        if (found != row->end()) {
+            kings_row = row - piece_array.begin();
+            kings_col = found - row->begin();
+            break;
+        }
+    }
+    //Get each piece to show possible moves and determine if they are attacking the king
+    for (int row = 0; row < (int) piece_array.size(); ++row) {
+        for (int col = 0; col < (int) piece_array.at(0).size(); ++col) {
+            Piece* ptr = piece_array.at(row).at(col);
+            if (color != ptr->get_control()) {
+                ptr->show_moves(this, row, col);
+                if (move_array.at(kings_row).at(kings_col)) return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool Board::has_selection() const noexcept {
     return selection.first != -1 || selection.second != -1;
 }

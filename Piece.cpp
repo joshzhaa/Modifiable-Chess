@@ -1,6 +1,7 @@
 #include "Piece.h"
 #include "Board.h"
 
+#include <stdexcept>
 #include <algorithm> //for find_if
 #include <utility> //for pair
 

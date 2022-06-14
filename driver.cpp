@@ -36,6 +36,7 @@ void console_play(Board* board) {
     string command;
     while(true) {
         board->print_board();
+        if (board->in_check(board->get_turn())) cout << "IN CHECK\n";
         if (board->has_selection()) {
             cout << MOVE_REQUEST;
         }
@@ -70,6 +71,7 @@ void console_play(Board* board) {
 int main() {
     Board* b = new Board(DEFAULT_FEN);
     b->set_rules(true);
+    b->set_compatibility(true);
     console_play(b);
     delete b;
     return 0;

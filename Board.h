@@ -44,6 +44,8 @@ class Board {
         //Doesn't work: VS, WSL ubuntu
         unordered_map<char, string> print_map;
         void initialize_print_map() noexcept;
+        //goes through move array and corrects it
+        void check_moves() noexcept;
         //Allows piece to mark its own possible moves by accessing move_array
         //More crucially facilitates castling
         friend class Piece;
@@ -70,6 +72,7 @@ class Board {
         char get_piece(int row, int col) const;
         size_t get_width() const noexcept;
         size_t get_height() const noexcept;
+        Player get_turn() const noexcept;
          
         void print_board() const noexcept;
        

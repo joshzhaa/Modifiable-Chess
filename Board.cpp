@@ -109,7 +109,23 @@ bool Board::select(int row, int col) {
     else {
         reset_selection();
     }
+    if (enforce_rules) check_moves();
     return ptr;
+}
+
+void Board::check_moves() noexcept {
+    for (size_t row = 0; row < move_array.size(); ++row) {
+        for(size_t col = 0; col < move_array[0].size(); ++col) {
+            //if piece thinks it can move there, make the move, check if it self-checks, make adjustments
+            if (move_array[row][col]) {
+                Piece *temp = piece_array[row][col];
+                piece_array[row][col] = piece_array.at(selection.first).at(selection.second);
+                if (in_check(turn)) move_array[row][col] = false;
+                piece_array[selection.first][selection.second] = piece_array[row][col];
+                piece_array[row][col] = temp;
+            }
+        }
+    }
 }
 
 //Attempts to move selected piece to position defined by parameters
@@ -163,7 +179,6 @@ bool Board::move(int row, int col) {
 
 //Prints board to cout using standard ASCII characters
 void Board::print_board() const noexcept {
-
     int rank = BOARD_HEIGHT;
     for (auto& row : piece_array) {
         cout << "   "; //left margin
@@ -197,7 +212,7 @@ void Board::print_board() const noexcept {
 }
 
 //iterates through all pieces to determine whether the position checks the player defined by color
-bool Board::in_check(Player color /*= turn*/) noexcept {
+bool Board::in_check(Player color) noexcept {
     vector<vector<bool>> temp(move_array); //TODO: is necessary? store move_array to switch back later
     //find appropriate king
     char target_id = color == Player::white ? 'K' : 'k';
@@ -218,12 +233,16 @@ bool Board::in_check(Player color /*= turn*/) noexcept {
     for (int row = 0; row < (int) piece_array.size(); ++row) {
         for (int col = 0; col < (int) piece_array.at(0).size(); ++col) {
             Piece* ptr = piece_array.at(row).at(col);
-            if (color != ptr->get_control()) {
+            if (ptr && color != ptr->get_control()) {
                 ptr->show_moves(this, row, col);
-                if (move_array.at(kings_row).at(kings_col)) return true;
+                if (move_array.at(kings_row).at(kings_col)) {
+                    move_array = temp;
+                    return true;
+                }
             }
         }
     }
+    move_array = temp;
     return false;
 }
 
@@ -254,6 +273,10 @@ size_t Board::get_height() const noexcept {
 
 size_t Board::get_width() const noexcept {
     return piece_array[0].size();
+}
+
+Player Board::get_turn() const noexcept {
+    return turn;
 }
 
 Board::~Board() noexcept {

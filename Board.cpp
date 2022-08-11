@@ -3,6 +3,7 @@
 #include "Player.h"
 
 #include <string>
+#include <algorithm>
 
 #ifdef DEBUG
 #include <iostream>
@@ -102,7 +103,7 @@ std::string Board::get_fen() {
 //Gameplay
 bool Board::select(const Vector& position) {
     Piece* ptr = piece_array.at(position.y).at(position.x);
-    if (!in_bounds(position) || ptr->get_player().get_team() != turn->get_team()) {
+    if (!in_bounds(position) || ptr->get_player().get_team() != players[turn].get_team()) {
         deselect();
         return false;
     }
@@ -119,15 +120,17 @@ void Board::deselect() noexcept {
     selection.x = -1;
 }
 bool Board::move(const Vector& position) {
-    if (has_selection() && !move_array.at(position.y).at(position.x)) {
+    if (!in_bounds(position) || !move_array.at(position.y).at(position.x)) {
         deselect();
         return false;
     }
-    piece_array.at(position.y).at(position.x) = piece_array.at(selection.y).at(selection.x);
-    piece_array.at(selection.y).at(selection.x) = nullptr;
+    Piece*& target = piece_array.at(selection.y).at(selection.x);
+    target->move(selection, position); //hides other state-altering function calls
+    piece_array.at(position.y).at(position.x) = target;
+    target = nullptr;
     deselect(); 
-    piece_array.at(position.y).at(position.x)->move();
-    ++turn;
+    turn = (turn + 1) % players.size();
+    history.emplace_back(selection.x, selection.y, position.x, position.y, players[turn].get_team(), target->get_id());
     return true;
 }
 void Board::mark(const Vector& position) {
@@ -172,6 +175,9 @@ const Player& Board::get_player(size_t i) const {
 const Vector& Board::get_selection() const noexcept {
     return selection;
 }
+const std::vector<Move>& Board::get_history() const noexcept {
+    return history;
+}
 //Special conditions/actions
 std::vector<Vector> Board::castle_conditions() noexcept {
     std::vector<Vector> direction_list;
@@ -199,8 +205,25 @@ std::vector<Vector> Board::castle_conditions() noexcept {
     }
     return direction_list;
 }
-void Board::castle() const noexcept {
+void Board::castle() noexcept {
     
+}
+bool Board::en_passantable(const Vector& position) const noexcept {
+    if (!in_bounds(position) || !get_piece(position) || get_piece(position)->get_id() != 'P') {
+        return false;
+    }
+    //if this pawn has been double moved in the last players.size() moves, return true, if not, false
+    int target_team = get_piece(position)->get_player().get_team();
+    auto start = history.rbegin();
+    auto end = start + players.size();
+    auto it = std::find_if(start, end, [&](const Move& move) {
+        return move.piece == 'P' && move.team == target_team && inf_norm(move.end - move.start) == 2;
+    });
+    return it != end;
+}
+void Board::en_passant(const Vector& position) noexcept {
+    Vector spot = position - players[turn].get_direction();
+    piece_array.at(spot.y).at(spot.x) = nullptr;
 }
 //debug
 #ifdef DEBUG

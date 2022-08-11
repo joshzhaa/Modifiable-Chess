@@ -42,8 +42,8 @@ class Piece {
         char get_id() const noexcept { return id; }
         //returns the Player that controls this piece
         const Player& get_player() const noexcept { return *player; }
-        //updates state of piece, K R and P keep track of whether they have moved yet
-        virtual void move() noexcept {}
+        //updates state of piece, K R and P and calls move side effects (which occur before the main movement of move)
+        virtual void move(const Vector& /*start*/, const Vector& /*end*/) noexcept {}
         //all pieces pretend they haven't moved by default as long as it doesn't matter
         virtual bool unmoved() const noexcept { return true; }
         virtual ~Piece() {};
@@ -58,7 +58,7 @@ class King : public Piece {
         King(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'K') {}
 
         virtual void show_moves(const Vector& position) const noexcept;
-        virtual void move() noexcept { has_moved = true; }
+        virtual void move(const Vector& start, const Vector& end) noexcept;
         virtual bool unmoved() const noexcept { return !has_moved; }
 
         virtual ~King() {}
@@ -81,7 +81,7 @@ class Rook : public Piece {
         Rook(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'R') {}
         
         virtual void show_moves(const Vector& position) const noexcept;
-        virtual void move() noexcept { has_moved = true; }
+        virtual void move(const Vector& /*start*/, const Vector& /*end*/) noexcept { has_moved = true; }
         virtual bool unmoved() const noexcept { return !has_moved; }
 
         virtual ~Rook() {}
@@ -113,7 +113,7 @@ class Pawn : public Piece {
         Pawn(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'P') {} 
         
         virtual void show_moves(const Vector& position) const noexcept;
-        virtual void move() noexcept { has_moved = true; }
+        virtual void move(const Vector& start, const Vector& end) noexcept;
         virtual bool unmoved() const noexcept { return !has_moved; }
 
 

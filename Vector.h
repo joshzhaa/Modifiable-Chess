@@ -14,5 +14,6 @@ Vector operator/ (const Vector& vec, int scalar);
 Vector operator+ (const Vector& a, const Vector& b);
 Vector operator- (const Vector& a, const Vector& b);
 Vector& operator+= (Vector& a, const Vector& b);
+int inf_norm(const Vector& vec);
 
 #endif //__VECTOR_H__

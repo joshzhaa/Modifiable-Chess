@@ -21,3 +21,8 @@ Vector& operator+= (Vector& a, const Vector& b) {
     a.y += b.y;
     return a;
 }
+//also known as maximum norm
+int inf_norm(const Vector& vec) {
+    Vector absolute{vec.x < 0 ? -1 * vec.x : vec.x, vec.y < 0 ? -1 * vec.y : vec.y};
+    return absolute.x > absolute.y ? absolute.x : absolute.y;
+}

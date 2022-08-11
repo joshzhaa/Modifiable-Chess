@@ -4,11 +4,24 @@
 #define __BOARD_H__
 
 #include "Player.h"
-
+#include "Vector.h"
 #include <vector>
+#include <set>
 #include <string>
 
+//struct for storing information about each move, sizeof(Move) == 20 -> 3 padding bytes
+struct Move {
+    Vector start;
+    Vector end;
+    int team;
+    char piece;
+    
+    Move(int startx, int starty, int endx, int endy, int team_in, char piece_in) : start{startx, starty},
+        end{endx, endy}, team{team_in}, piece{piece_in} {}
+};
+
 class Piece;
+
 /*
 Class stores pieces on the board geometrically inside a std::vector of the same shape as the board.
 Board uses the Vector struct declared above to uniquely identify each square. The board is the 1st quadrant
@@ -21,11 +34,12 @@ class Board {
     private: 
         std::vector<std::vector<Piece*>> piece_array; //geometric representation of board, nullptr represents empty
         std::vector<std::vector<bool>> move_array; //array showing allowed moves 
+        std::vector<Move> history;
         std::vector<Player> players; //this lists players in turn order
-        std::vector<Player>::iterator turn; //turn points to current Player with active turn
+        size_t turn = 0; //turn points to current Player with active turn
         //Position of user's most recently selected square
         //selection.x = -1 is a special value which signifies no selection
-        Vector selection; 
+        Vector selection;
         
     public:
         Board(size_t height, size_t width); //Constructs an empty board
@@ -50,11 +64,12 @@ class Board {
         const Piece* get_piece(const Vector& position) const;
         const Player& get_player(size_t i) const;
         const Vector& get_selection() const noexcept;
+        const std::vector<Move>& get_history() const noexcept;
         //Special conditions/actions
         std::vector<Vector> castle_conditions() noexcept; //returns vectors in direction of rook
-        void castle() const noexcept;
-        bool en_passantable(const Piece* pawn) const noexcept;
-        void en_passant() const noexcept;
+        void castle() noexcept; //move, requires legality
+        bool en_passantable(const Vector& position) const noexcept; //if pawn at position recently double-moved
+        void en_passant(const Vector& position) noexcept; //move, requires legality
 #ifdef DEBUG
         void print() const noexcept;
 #endif

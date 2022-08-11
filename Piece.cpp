@@ -76,18 +76,28 @@ void Pawn::show_moves(const Vector& position) const noexcept {
         if (!board->is_occupied(position + distance * direction)) attack(position + distance * direction);
     }
     //generate an orthogonal vector to the pawn's direction only works on vectors with one 0 component
-    Vector offset{0, 0};
+    Vector offset;
     offset.x = !direction.x;
     offset.y = !direction.y;
     //capture right
     Vector capture = position + direction + offset;
-    if (board->is_occupied(capture) && player->is_opposed(board->get_piece(capture)->get_player())) {
+    if ((board->is_occupied(capture) && player->is_opposed(board->get_piece(capture)->get_player())) 
+        || board->en_passantable(position + offset)) {
         attack(capture);
     }
     //capture left
     capture = position + direction - offset;
-    if (board->is_occupied(capture) && player->is_opposed(board->get_piece(capture)->get_player())) {
+    if ((board->is_occupied(capture) && player->is_opposed(board->get_piece(capture)->get_player()))
+        || board->en_passantable(position - offset)) {
         attack(capture);
+    }
+}
+
+void Pawn::move(const Vector& start, const Vector& end) noexcept {
+    has_moved = true;
+    Vector displacement = end - start;
+    if (!board->is_occupied(end) && displacement.x && displacement.y) { //if en passant
+        board->en_passant(end); 
     }
 }
 

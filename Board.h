@@ -3,80 +3,62 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
-#include "Piece.h"
+#include "Player.h"
 
 #include <vector>
-#include <utility>
 #include <string>
 
-#include <unordered_map>
-
-#define BOARD_WIDTH 8
-#define BOARD_HEIGHT 8
-
-using namespace std;
-
-class Piece; //forward declaration
-
-//Class stores pieces on the board geometrically inside a vector of the same shape as the board
-//Board uses a (row, col) format such as (3, 4) to identify squares as a typical 2D array in computer science
-//as opposed to the chess convention of rank and file
-//Board can be in 2 states, has_selection = true or = false. Either a square has just been selected
-//or a move has just been made (equivalent to starting state)
+class Piece;
+/*
+Class stores pieces on the board geometrically inside a std::vector of the same shape as the board.
+Board uses the Vector struct declared above to uniquely identify each square. The board is the 1st quadrant
+Board can be in 2 states, has_selection = false or = true. In these states, the Board expects to see a move
+or expects to see a piece selection. Selected piece is identified by Vector selection. Valid moves for selection 
+are declared by each Piece in piece_array by writing a true into move_array. Turns advance in the order of
+the std::vector of Player objects.
+*/
 class Board {
-    private:
-        //array containing piece objects, nullptr represents empty
-        vector<vector<Piece*>> piece_array;
-        //array showing allowed moves
-        vector<vector<bool>> move_array;
+    private: 
+        std::vector<std::vector<Piece*>> piece_array; //geometric representation of board, nullptr represents empty
+        std::vector<std::vector<bool>> move_array; //array showing allowed moves 
+        std::vector<Player> players; //this lists players in turn order
+        std::vector<Player>::iterator turn; //turn points to current Player with active turn
         //Position of user's most recently selected square
-        pair<int, int> selection; //selection = (-1, -1) is a special value which means no selection
-        //Keeps track of whose turn it is, updated by move
-        Player turn = Player::white;
-
-        //game options
-        bool enforce_rules = false;
-        bool allow_castling = true;
-        bool compatibility = true; //print_board only prints FEN ids instead of special chess characters
+        //selection.x = -1 is a special value which signifies no selection
+        Vector selection; 
         
-        //Printing special chess symbol characters only works on some terminals
-        //Only terminal I know to work is VSCode terminal
-        //Doesn't work: VS, WSL ubuntu
-        unordered_map<char, string> print_map;
-        void initialize_print_map() noexcept;
-        //goes through move array and corrects it
-        void check_moves() noexcept;
-        //Allows piece to mark its own possible moves by accessing move_array
-        //More crucially facilitates castling
-        friend class Piece;
-        friend void King::show_moves(Board*, int, int) const noexcept; 
     public:
-        Board(); //Constructs an empty board
-        Board(const string& FEN); //Calls set_board(FEN)
-        
+        Board(size_t height, size_t width); //Constructs an empty board
+        Board(const std::string& mFEN, size_t height, size_t width); //Calls set_fen(FEN) 
         //Board setup
-        void add(char piece_id, int row, int col) noexcept;
-        void set_board(const string& FEN);
-        void set_rules(bool setting) noexcept;
-        void set_castling(bool setting) noexcept;
-        void set_compatibility(bool setting) noexcept;
+        const Piece& add_piece(const Vector& position, char piece_id, const Player& player); //construct Piece at position
+        const Player& add_player(int team_id, const Vector& pawn_direction);
+        void set_fen(const std::string& mFEN); //set board to state according to mFEN
+        std::string get_fen(); //set board to state according to mFEN
         //Gameplay
-        bool select(int row, int col);
-        void reset_selection() noexcept;
-        bool move(int row, int col);
+        bool select(const Vector& position); //select Piece at position
+        void deselect() noexcept; //set selection.x = -1
+        bool move(const Vector& position); //move Piece at selection to position
+        void mark(const Vector& position); //mark move_array at position to be true
         //Get information about instance of Board
-        bool in_check(Player color) noexcept;
-        bool has_selection() const noexcept;
-        bool has_moved(int row, int col) const;
-        bool is_occupied(int row, int col) const noexcept;
-        char get_piece(int row, int col) const;
-        size_t get_width() const noexcept;
+        bool has_selection() const noexcept; //get state of Board
+        bool is_occupied(const Vector& position) const;
+        bool in_bounds(const Vector& position) const noexcept;
+        bool is_attacked(const Vector& postition, const Player& attacker); //is position being attacked by player
+        size_t get_width() const; //REQUIRES more than one rank to be on the board
         size_t get_height() const noexcept;
-        Player get_turn() const noexcept;
-         
-        void print_board() const noexcept;
-       
+        const Piece* get_piece(const Vector& position) const;
+        const Player& get_player(size_t i) const;
+        const Vector& get_selection() const noexcept;
+        //Special conditions/actions
+        std::vector<Vector> castle_conditions() noexcept; //returns vectors in direction of rook
+        void castle() const noexcept;
+        bool en_passantable(const Piece* pawn) const noexcept;
+        void en_passant() const noexcept;
+#ifdef DEBUG
+        void print() const noexcept;
+#endif
         ~Board();
 };
 
-#endif
+#endif //__BOARD_H__

@@ -1,17 +1,17 @@
-//Class declarations for all the pieces in chess as well as their necessary utilities
+/*Class declarations for all the pieces as well as their necessary utilities
+Accomodates the easy addition of new non-standard chess pieces
+TO ADD NEW PIECES:
+    (1) create new class which defines piece behavior
+    (2) write show_moves to determine how piece moves, attack and extend are provided for this
+    (3) add to piece_factory
+*/
 
 #ifndef __PIECE_H__
 #define __PIECE_H__
 
-using namespace std;
-
-class Board; //forward declaration
-
-//for encoding who controls a piece and whose turn it is
-enum class Player : char {
-    white = 0,
-    black = 1
-};
+class Vector;
+class Player;
+class Board;
 
 //abstract base class from which King, Queen, etc. are derived
 class Piece {
@@ -19,114 +19,108 @@ class Piece {
         char id; //char piece id in FEN format
 
     protected:
-        //marks a location on move_array as valid to move into, returns true if occupied by another piece
-        bool mark_at(Board* board, int row, int col) const noexcept;
-
+        Board* board; //tells piece which board it is on
+        const Player* player; //the controlling player
+        /* Mark a square as valid to move to, returns false when blocked
+        out of bounds -> false, don't mark
+        empty -> true, mark
+        piece same team -> false, don't mark
+        piece other team -> false, mark */
+        bool attack(const Vector& position) const noexcept;
+        //attack spaces in a direction repeatedly until blocks
+        //direction must move one square on a grid
+        void extend(const Vector& direction, Vector start) const noexcept;
+    
     public:
-        Piece() { id = 0; } //default constructor creates an Empty piece
-        
         //assigns piece id, correcting for white or black side
         //structured this way to allow child classes to assign id in constructor
-        Piece(bool is_white, char id_in);
+        Piece(Board* b_in, const Player* p_in, char id_in);
         
-        //marks possible moves on board->move_array as true
-        virtual void show_moves(Board* board, int row, int col) const noexcept = 0;
-        
+        //marks possible moves on Board::move_array as true
+        virtual void show_moves(const Vector& position) const noexcept = 0;
         //returns the FEN format piece id
         char get_id() const noexcept { return id; }
-        
         //returns the Player that controls this piece
-        Player get_control() const noexcept;
-
+        const Player& get_player() const noexcept { return *player; }
         //updates state of piece, K R and P keep track of whether they have moved yet
         virtual void move() noexcept {}
+        //all pieces pretend they haven't moved by default as long as it doesn't matter
+        virtual bool unmoved() const noexcept { return true; }
         virtual ~Piece() {};
 };
 
 //Standard Chess Pieces
 class King : public Piece {
     private:
-        bool has_moved = false;
+        bool has_moved = false; //for castling
 
     public:
-        King() : Piece(true, 'k') {}
-        King(bool is_white) : Piece(is_white, 'k') {}
-        
-        virtual void show_moves(Board* board, int row, int col) const noexcept;
-        virtual void move() noexcept { has_moved = true; };
+        King(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'K') {}
+
+        virtual void show_moves(const Vector& position) const noexcept;
+        virtual void move() noexcept { has_moved = true; }
+        virtual bool unmoved() const noexcept { return !has_moved; }
+
         virtual ~King() {}
 };
 
 class Queen : public Piece {
-    public:
-        Queen() : Piece(true, 'q') {}
-        Queen(bool is_white) : Piece(is_white, 'q') {}
+    public: 
+        Queen(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'Q') {}
         
-        virtual void show_moves(Board* board, int row, int col) const noexcept;
+        virtual void show_moves(const Vector& position) const noexcept;
         
         virtual ~Queen() {}
 };
 
 class Rook : public Piece {
     private:
-        bool has_moved = false;
-        friend void King::show_moves(Board*, int, int) const noexcept;
-    public:
-        Rook() : Piece(true, 'r') {}
-        Rook(bool is_white) : Piece(is_white, 'r') {}
+        bool has_moved = false; //for castling
+
+    public: 
+        Rook(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'R') {}
         
-        virtual void show_moves(Board* board, int row, int col) const noexcept;
+        virtual void show_moves(const Vector& position) const noexcept;
         virtual void move() noexcept { has_moved = true; }
-        bool unmoved() const noexcept { return !has_moved; }
+        virtual bool unmoved() const noexcept { return !has_moved; }
+
         virtual ~Rook() {}
 };
 
 class Bishop : public Piece {
-    public:
-        Bishop() : Piece(true, 'b') {}
-        Bishop(bool is_white) : Piece(is_white, 'b') {}
+    public: 
+        Bishop(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'B') {} 
         
-        virtual void show_moves(Board* board, int row, int col) const noexcept;
+        virtual void show_moves(const Vector& position) const noexcept;
 
         virtual ~Bishop() {}
 };
 
 class Knight : public Piece {
-    public:
-        Knight() : Piece(true, 'n') {}
-        Knight(bool is_white) : Piece(is_white, 'n') {}
+    public: 
+        Knight(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'N') {} 
         
-        virtual void show_moves(Board* board, int row, int col) const noexcept;
+        virtual void show_moves(const Vector& position) const noexcept;
 
         virtual ~Knight() {}
 };
 
 class Pawn : public Piece {
     private:
-        bool has_moved = false;
-
-    public:
-        Pawn() : Piece(true, 'p') {}
-        Pawn(bool is_white) : Piece(is_white, 'p') {}
+        bool has_moved = false; //for initial 2 space move
+    
+    public: 
+        Pawn(Board* b_in, const Player* p_in) : Piece(b_in, p_in, 'P') {} 
         
-        virtual void show_moves(Board* board, int row, int col) const noexcept;
-        void move() noexcept { has_moved = true; }
+        virtual void show_moves(const Vector& position) const noexcept;
+        virtual void move() noexcept { has_moved = true; }
+        virtual bool unmoved() const noexcept { return !has_moved; }
+
 
         virtual ~Pawn() {}
 };
 
-//comparator for castling
-//looks at piece, returns true if unmoved rook, false otherwise
-struct is_unmoved_rook {
-    bool operator() (Piece *p) const noexcept {
-        Rook *r = dynamic_cast<Rook*>(p);
-        if (r) {
-            return r->unmoved();
-        }
-        else {
-            return false;
-        }
-    }
-};
+//return pointer to dynamically allocated Piece, nullptr if invalid piece_id
+Piece* piece_factory(char piece_id, const Player* player, Board* board) noexcept;
 
-#endif
+#endif //__PIECE_H__

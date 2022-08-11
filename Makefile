@@ -1,20 +1,21 @@
-EXECUTABLE  = run.exe
+EXECUTABLE  = test.exe
 
-PROJECTFILE = driver.cpp
-ATH := /usr/um/gcc-6.2.0/bin:$(PATH)
-LD_LIBRARY_PATH := /usr/um/gcc-6.2.0/lib64
-LD_RUN_PATH := /usr/um/gcc-6.2.0/lib64
+PROJECTFILE = test.cpp
 
 SOURCES     = $(wildcard *.cpp)
 OBJECTS     = $(SOURCES:%.cpp=%.o)
-# designate which compiler to use
+
 CXX         = g++
+CXXFLAGS = -std=c++2a -Wconversion -Wall -Wextra -pedantic 
 
-#Default Flags (we prefer -std=c++17 but Mac/Xcode/Clang doesn't support)
-CXXFLAGS = -std=c++1z -Wconversion -Wall -Wextra -pedantic 
+opt: CXXFLAGS += -O3 -g3 -DDEBUG
+opt:
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
 
-# make debug - will compile sources with $(CXXFLAGS) and the -g3 flag
-#              also defines DEBUG, so "#ifdef DEBUG /*...*/ #endif" works
+release: CXXFLAGS += -O3
+release:
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
+
 debug: CXXFLAGS += -g3 -DDEBUG
 debug:
 	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)

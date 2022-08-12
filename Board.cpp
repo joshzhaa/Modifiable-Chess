@@ -63,13 +63,11 @@ std::string Board::get_fen() {
                 if (empty_count) {
                     fen += std::to_string(empty_count) + std::string(",");
                     empty_count = 0;
-                }
-                else {
+                } else {
                     fen.push_back(piece->get_id());
                     fen += std::string(":") + std::to_string(piece->get_player().get_team()) + std::string(",");
                 }
-            }
-            else {
+            } else {
                 ++empty_count;
             }
         }
@@ -81,23 +79,37 @@ std::string Board::get_fen() {
     fen.back() = ' ';
     // (3) Move status
     std::string move_fen;
+    std::string passant_fen;
     for (int y = int(get_height()) - 1; y >= 0; --y) {
         for (int x = 0; x < int(get_width()); ++x) {
             Piece* piece = piece_array.at(y).at(x);
             if (piece && !piece->unmoved()) {
                 move_fen += "(" + std::to_string(x) + "," + std::to_string(y) + "),";
             }
+            if (piece && en_passantable({x, y})) {
+                passant_fen += "(" + std::to_string(x) + "," + std::to_string(y) + "),";
+            }
         }
     }
     if (move_fen.empty()) {
         fen += "- ";
-    }
-    else {
+    } else {
         fen += move_fen;
         fen.back() = ' ';
     }
     // (4) En Passant attacking square
-
+    if (passant_fen.empty()) {
+        fen += "- ";
+    } else {
+        fen += passant_fen;
+        fen.back() = ' ';
+    }
+    // (5) Current turn
+    fen += std::to_string(turn) + " ";
+    // (6) Half-move clock
+    fen += std::to_string(halfmove_clock()) + " ";
+    // (7) Full-move clock
+    fen += std::to_string(fullmove_clock());
     return fen;
 }
 //Gameplay
@@ -130,7 +142,8 @@ bool Board::move(const Vector& position) {
     target = nullptr;
     deselect(); 
     turn = (turn + 1) % players.size();
-    history.emplace_back(selection.x, selection.y, position.x, position.y, players[turn].get_team(), target->get_id());
+    history.emplace_back(get_fen(), selection.x, selection.y, position.x, position.y, players[turn].get_team(), 
+        target->get_id());
     return true;
 }
 void Board::mark(const Vector& position) {
@@ -178,6 +191,27 @@ const Vector& Board::get_selection() const noexcept {
 const std::vector<Move>& Board::get_history() const noexcept {
     return history;
 }
+int Board::halfmove_clock() const noexcept {
+    int count = -1;
+    auto it = std::find_if(history.rbegin(), history.rend(), [&](const Move& move) {
+        ++count;
+        Board past(move.state, get_height(), get_width());
+        return move.piece == 'P' || past.occupancy() > occupancy();
+    });
+    return it == history.rend() ? int(history.size()) : count;
+}
+int Board::fullmove_clock() const noexcept {
+    return int((history.size() / 2) + 1);
+}
+int Board::occupancy() const noexcept {
+    int count = 0;
+    for (auto& row : piece_array) {
+        for (auto& piece : row) {
+            count += bool(piece);
+        }
+    }
+    return count;
+}
 //Special conditions/actions
 std::vector<Vector> Board::castle_conditions() noexcept {
     std::vector<Vector> direction_list;
@@ -209,13 +243,14 @@ void Board::castle() noexcept {
     
 }
 bool Board::en_passantable(const Vector& position) const noexcept {
-    if (!in_bounds(position) || !get_piece(position) || get_piece(position)->get_id() != 'P') {
+    if (!in_bounds(position) || !get_piece(position) || get_piece(position)->get_id() != 'P' || history.empty()) {
         return false;
     }
     //if this pawn has been double moved in the last players.size() moves, return true, if not, false
     int target_team = get_piece(position)->get_player().get_team();
     auto start = history.rbegin();
     auto end = start + players.size();
+    if (end >= history.rend()) end = history.rend();
     auto it = std::find_if(start, end, [&](const Move& move) {
         return move.piece == 'P' && move.team == target_team && inf_norm(move.end - move.start) == 2;
     });
@@ -239,8 +274,7 @@ void Board::print() const noexcept {
             std::cout << "|"; //space border
             if (piece) { //if a piece is occupying
                 std::cout << highlight << piece/*->get_id()*/->get_player().get_team() << highlight; 
-            }
-            else { //if there is no occupying piece
+            } else { //if there is no occupying piece
                 std::cout << ' ' << highlight << ' ';
             }
         }

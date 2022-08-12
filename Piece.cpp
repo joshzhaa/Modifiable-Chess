@@ -30,6 +30,9 @@ void King::show_moves(const Vector& position) const noexcept {
         attack(position + 2 * direction);
     }
 }
+void King::move(const Vector& start, const Vector& end) noexcept {
+
+}
 
 void Queen::show_moves(const Vector& position) const noexcept {
     for (int i = -1; i <= 1; ++i) {
@@ -80,17 +83,15 @@ void Pawn::show_moves(const Vector& position) const noexcept {
     offset.x = !direction.x;
     offset.y = !direction.y;
     //capture right
-    Vector capture = position + direction + offset;
-    if ((board->is_occupied(capture) && player->is_opposed(board->get_piece(capture)->get_player())) 
-        || board->en_passantable(position + offset)) {
-        attack(capture);
-    }
+    auto conditional_attack = [&](const Vector& capture_pos, const Vector& passant_pos) {
+        if ((board->is_occupied(capture_pos) && player->is_opposed(board->get_piece(capture_pos)->get_player())) || 
+            (board->en_passantable(passant_pos) && player->is_opposed(board->get_piece(passant_pos)->get_player()))) {
+            attack(capture_pos);
+        }
+    };
+    conditional_attack(position + direction + offset, position + offset);
     //capture left
-    capture = position + direction - offset;
-    if ((board->is_occupied(capture) && player->is_opposed(board->get_piece(capture)->get_player()))
-        || board->en_passantable(position - offset)) {
-        attack(capture);
-    }
+    conditional_attack(position + direction - offset, position - offset);
 }
 
 void Pawn::move(const Vector& start, const Vector& end) noexcept {

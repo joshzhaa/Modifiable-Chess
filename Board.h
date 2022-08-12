@@ -11,13 +11,14 @@
 
 //struct for storing information about each move, sizeof(Move) == 20 -> 3 padding bytes
 struct Move {
+    std::string state; //Board state which Move transitioned into
     Vector start;
     Vector end;
     int team;
     char piece;
     
-    Move(int startx, int starty, int endx, int endy, int team_in, char piece_in) : start{startx, starty},
-        end{endx, endy}, team{team_in}, piece{piece_in} {}
+    Move(const std::string& state_in, int startx, int starty, int endx, int endy, int team_in, char piece_in) : 
+        state(state_in), start{startx, starty}, end{endx, endy}, team{team_in}, piece{piece_in} {}
 };
 
 class Piece;
@@ -40,7 +41,6 @@ class Board {
         //Position of user's most recently selected square
         //selection.x = -1 is a special value which signifies no selection
         Vector selection;
-        
     public:
         Board(size_t height, size_t width); //Constructs an empty board
         Board(const std::string& mFEN, size_t height, size_t width); //Calls set_fen(FEN) 
@@ -65,6 +65,9 @@ class Board {
         const Player& get_player(size_t i) const;
         const Vector& get_selection() const noexcept;
         const std::vector<Move>& get_history() const noexcept;
+        int halfmove_clock() const noexcept; //for fifty-move rule
+        int fullmove_clock() const noexcept;
+        int occupancy() const noexcept; //returns number of pieces on Board
         //Special conditions/actions
         std::vector<Vector> castle_conditions() noexcept; //returns vectors in direction of rook
         void castle() noexcept; //move, requires legality

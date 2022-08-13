@@ -3,14 +3,14 @@
 #include "Board.h"
 #include <iosfwd>
 
-class Console {
+class Terminal {
     private:
         std::istream& in;
         std::ostream& out;
         bool active = true;
     public:
-        Console() : in(std::cin), out(std::cout) {}
-        Console(istream& in, ostream& out) : in(in), out(out) {}
+        Terminal() : in(std::cin), out(std::cout) {}
+        Terminal(istream& in, ostream& out) : in(in), out(out) {}
 
         void start();
         void input();

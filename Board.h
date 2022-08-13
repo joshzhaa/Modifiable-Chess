@@ -45,8 +45,8 @@ class Board {
         Board(size_t height, size_t width); //Constructs an empty board
         Board(const std::string& mFEN, size_t height, size_t width); //Calls set_fen(FEN) 
         //Board setup
-        const Piece& add_piece(const Vector& position, char piece_id, const Player& player); //construct Piece at position
-        const Player& add_player(int team_id, const Vector& pawn_direction);
+        void add_piece(const Vector& position, char piece_id, int team_id); //construct Piece at position
+        void add_player(int team_id, const Vector& pawn_direction);
         void set_fen(const std::string& mFEN); //set board to state according to mFEN
         std::string get_fen(); //set board to state according to mFEN
         //Gameplay
@@ -62,7 +62,7 @@ class Board {
         size_t get_width() const; //REQUIRES more than one rank to be on the board
         size_t get_height() const noexcept;
         const Piece* get_piece(const Vector& position) const;
-        const Player& get_player(size_t i) const;
+        const Player& get_player(int team_id) const; //gets first player matching team_id
         const Vector& get_selection() const noexcept;
         const std::vector<Move>& get_history() const noexcept;
         int halfmove_clock() const noexcept; //for fifty-move rule

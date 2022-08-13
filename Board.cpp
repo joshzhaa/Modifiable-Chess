@@ -17,62 +17,69 @@ Board::Board(const std::string& mFEN, size_t height, size_t width) : Board(heigh
     set_fen(mFEN);
 }
 //Board setup
-const Piece& Board::add_piece(const Vector& position, char piece_id, const Player& player) {
-    return *(piece_array.at(position.y).at(position.x) = piece_factory(piece_id, &player, this));
+void Board::add_piece(const Vector& position, char piece_id, int team_id) {
+    piece_array.at(position.y).at(position.x) = piece_factory(piece_id, &get_player(team_id), this);
 }
-const Player& Board::add_player(int team_id, const Vector& pawn_direction) {
+void Board::add_player(int team_id, const Vector& pawn_direction) {
     players.emplace_back(team_id, pawn_direction);
-    return players.back();
 }
+
 void Board::set_fen(const std::string& mFEN) {
-    //player list
-    
-    //piece placements
-    auto it = mFEN.begin();
-    for (auto row = piece_array.rbegin(); row != piece_array.rend(); ++row) {
-        for (auto& piece : *row) {
-            //read one piece
-            char piece_id;
-            char c = '0';
-            std::string player_id;
-            piece_id = *it++;
-            ++it; //skip colon
-            while (c != ',') {
-                c = *it++;
-                player_id.push_back(c);
-            }
-            ++it;
-            //create piece
+    //start is a reference, so this advances it, end can be a temporary
+    auto parse_int = [](std::string::const_iterator& start, std::string::const_iterator end) {
+        std::string number;
+        while (start != end && std::isdigit(*start)) {
+            number.push_back(*start++);
         }
+        return std::stoi(number);
+    };
+    //player list
+    auto it = mFEN.begin();
+    while(*it != ' ') {
+        int team_id = parse_int(it, mFEN.end());
+        it += 2; //:(
+        Vector pawn_direction;
+        pawn_direction.x = parse_int(it, mFEN.end());
+        ++it; //,
+        pawn_direction.y = parse_int(it, mFEN.end());
+        ++it; //)
+        players.emplace_back(team_id, pawn_direction);
     }
-    //sort player array
+    ++it; //space
+    //piece placements
+    for (int y = int(get_height()) - 1; y >= 0; --y) {
+        for (int x = 0; x < int(get_width()); ++x) {
+            //read one piece
+            char piece_id = *it++;
+            if (piece_id == '-') {
+                piece_array.at(y).at(x) = nullptr;
+                continue;
+            }
+            ++it; //:
+            int team_id = parse_int(it, mFEN.end());
+            //create piece
+            add_piece(Vector{x, y}, piece_id, team_id);
+        }
+        ++it; //forward slash or in the last iteration space
+    }
 }
 std::string Board::get_fen() {
     // (1) player list
     std::string fen;
     for (auto& player : players) {
         fen += std::to_string(player.get_team()) + std::string(":(") + std::to_string(player.get_direction().x) 
-            + std::string(",") + std::to_string(player.get_direction().y) + std::string("),");
+            + std::string(",") + std::to_string(player.get_direction().y) + std::string(")");
     }
-    fen.back() = ' ';
+    fen.push_back(' ');
     // (2) piece_placements 
     for (auto row = piece_array.rbegin(); row != piece_array.rend(); ++row) {
-        int empty_count = 0;
         for (auto& piece : *row) {
             if (piece) {
-                if (empty_count) {
-                    fen += std::to_string(empty_count) + std::string(",");
-                    empty_count = 0;
-                } else {
-                    fen.push_back(piece->get_id());
-                    fen += std::string(":") + std::to_string(piece->get_player().get_team()) + std::string(",");
-                }
+                fen.push_back(piece->get_id());
+                fen += std::string(":") + std::to_string(piece->get_player().get_team());
             } else {
-                ++empty_count;
+                fen += "-";
             }
-        }
-        if (empty_count) {
-            fen += std::to_string(empty_count) + std::string(",");
         }
         fen.back() = '/';
     }
@@ -182,8 +189,10 @@ size_t Board::get_height() const noexcept {
 const Piece* Board::get_piece(const Vector& position) const {
     return piece_array.at(position.y).at(position.x);
 }
-const Player& Board::get_player(size_t i) const {
-    return players.at(i);
+const Player& Board::get_player(int team_id) const {
+    return *std::find_if(players.begin(), players.end(), [=](const Player& player) {
+        return player.get_team() == team_id;
+    });
 }
 const Vector& Board::get_selection() const noexcept {
     return selection;

@@ -9,7 +9,7 @@ TO ADD NEW PIECES:
 #ifndef __PIECE_H__
 #define __PIECE_H__
 
-class Vector;
+struct Vector;
 class Player;
 class Board;
 

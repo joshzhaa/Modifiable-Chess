@@ -59,8 +59,8 @@ class Board {
         bool is_occupied(const Vector& position) const;
         bool in_bounds(const Vector& position) const noexcept;
         bool is_attacked(const Vector& postition, const Player& attacker); //is position being attacked by player
-        size_t get_width() const; //REQUIRES more than one rank to be on the board
-        size_t get_height() const noexcept;
+        size_t width() const; //REQUIRES more than one rank to be on the board
+        size_t height() const noexcept;
         const Piece* get_piece(const Vector& position) const;
         const Player& get_player(int team_id) const; //gets first player matching team_id
         const Vector& get_selection() const noexcept;

@@ -47,8 +47,8 @@ void Board::set_fen(const std::string& mFEN) {
     }
     ++it; //space
     //piece placements
-    for (int y = int(get_height()) - 1; y >= 0; --y) {
-        for (int x = 0; x < int(get_width()); ++x) {
+    for (int y = int(height()) - 1; y >= 0; --y) {
+        for (int x = 0; x < int(width()); ++x) {
             //read one piece
             char piece_id = *it++;
             if (piece_id == '-') {
@@ -87,8 +87,8 @@ std::string Board::get_fen() {
     // (3) Move status
     std::string move_fen;
     std::string passant_fen;
-    for (int y = int(get_height()) - 1; y >= 0; --y) {
-        for (int x = 0; x < int(get_width()); ++x) {
+    for (int y = int(height()) - 1; y >= 0; --y) {
+        for (int x = 0; x < int(width()); ++x) {
             Piece* piece = piece_array.at(y).at(x);
             if (piece && !piece->unmoved()) {
                 move_fen += "(" + std::to_string(x) + "," + std::to_string(y) + "),";
@@ -158,18 +158,18 @@ void Board::mark(const Vector& position) {
 }
 //Get information about instance of Board
 bool Board::has_selection() const noexcept {
-    return selection.x == -1;
+    return selection.x != -1;
 }
 bool Board::is_occupied(const Vector& position) const {
     return piece_array.at(position.y).at(position.x);
 }
 bool Board::in_bounds(const Vector& position) const noexcept {
-    return position.x < int(get_width()) && position.y < int(get_height()) && position.x >= 0 && position.y >= 0;
+    return position.x < int(width()) && position.y < int(height()) && position.x >= 0 && position.y >= 0;
 }
 bool Board::is_attacked(const Vector& position, const Player& attacker) {
     std::vector<std::vector<bool>> temp(move_array);
-    for (int y = int(get_height()) - 1; y >= 0; --y) {
-        for (int x = 0; x < int(get_width()); ++x) {
+    for (int y = int(height()) - 1; y >= 0; --y) {
+        for (int x = 0; x < int(width()); ++x) {
             Piece* piece = piece_array[y][x];
             if (piece->get_player().get_team() == attacker.get_team()) {
                 piece->show_moves({x, y});
@@ -180,10 +180,10 @@ bool Board::is_attacked(const Vector& position, const Player& attacker) {
     move_array.swap(temp);
     return false;
 }
-size_t Board::get_width() const {
+size_t Board::width() const {
     return piece_array.at(0).size();
 }
-size_t Board::get_height() const noexcept {
+size_t Board::height() const noexcept {
     return piece_array.size();
 }
 const Piece* Board::get_piece(const Vector& position) const {
@@ -204,7 +204,7 @@ int Board::halfmove_clock() const noexcept {
     int count = -1;
     auto it = std::find_if(history.rbegin(), history.rend(), [&](const Move& move) {
         ++count;
-        Board past(move.state, get_height(), get_width());
+        Board past(move.state, height(), width());
         return move.piece == 'P' || past.occupancy() > occupancy();
     });
     return it == history.rend() ? int(history.size()) : count;
@@ -272,14 +272,14 @@ void Board::en_passant(const Vector& position) noexcept {
 //debug
 #ifdef DEBUG
 void Board::print() const noexcept {
-    size_t rank = get_height();
+    size_t rank = height();
     for (auto row = piece_array.rbegin(); row != piece_array.rend(); ++row) {
         std::cout << "   "; //left margin
-        for (size_t i = 0; i < get_width(); ++i) std::cout << "+---";
+        for (size_t i = 0; i < width(); ++i) std::cout << "+---";
         std::cout << "+\n " << rank-- << " "; //end of border and beginning of next line margin
-        for (size_t i = 0; i < get_width(); ++i) { //fill in squares
+        for (size_t i = 0; i < width(); ++i) { //fill in squares
             Piece* piece = row->at(i);
-            char highlight = move_array.at(get_height() - rank - 1).at(i) ? '*' : ' ';
+            char highlight = move_array.at(height() - rank - 1).at(i) ? '*' : ' ';
             std::cout << "|"; //space border
             if (piece) { //if a piece is occupying
                 std::cout << highlight << piece/*->get_id()*/->get_player().get_team() << highlight; 
@@ -290,11 +290,11 @@ void Board::print() const noexcept {
         std::cout << "|\n"; //space border
     }
     std::cout << "   ";
-    for (size_t i = 0; i < get_width(); ++i) {
+    for (size_t i = 0; i < width(); ++i) {
         std::cout << "+---";
     }
     std::cout << "+\n  ";
-    for (size_t i = 0; i < get_width(); ++i) {
+    for (size_t i = 0; i < width(); ++i) {
         std::cout << "   " << char('a' + i);
     }
     std::cout << "\n";

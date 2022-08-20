@@ -5,12 +5,8 @@ PROJECTFILE = test.cpp
 SOURCES     = $(wildcard *.cpp)
 OBJECTS     = $(SOURCES:%.cpp=%.o)
 
-CXX         = g++
-CXXFLAGS = -std=c++2a -Wconversion -Wall -Wextra -pedantic 
-
-opt: CXXFLAGS += -O3 -g3 -DDEBUG
-opt:
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
+CXX         = clang++
+CXXFLAGS = -std=c++2a -Wall -Wextra -pedantic 
 
 release: CXXFLAGS += -O3
 release:

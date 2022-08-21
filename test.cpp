@@ -38,6 +38,7 @@ void test_manual(Board& b) {
 
 //test terminal interface
 int main() {
+    std::ios_base::sync_with_stdio(false);
     Terminal interface(8, 8);
     interface.get_board().set_fen("0:(0,1)1:(0,-1) R:1N:1B:1Q:1K:1B:1N:1R:1/P:1P:1P:1P:1P:1P:1P:1P:1/--------/--------/--------/--------/P:0P:0P:0P:0P:0P:0P:0P:0/R:0N:0B:0Q:0K:0B:0N:0R:0 - - 0 0 1");
     //test_manual(interface.get_board());

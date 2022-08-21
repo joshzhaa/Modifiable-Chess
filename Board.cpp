@@ -194,6 +194,9 @@ bool Board::is_attacked(const Vector& position, const Player& attacker) {
     move_array.swap(temp);
     return false;
 }
+bool Board::is_valid(const Vector& position) const noexcept {
+    return in_bounds(position) && move_array[position.y][position.x];
+}
 size_t Board::width() const {
     return piece_array.at(0).size();
 }

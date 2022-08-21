@@ -25,15 +25,15 @@ void Terminal::input() {
     if (board.has_selection()) {
         const Vector begin = board.get_selection(); //needs to be a copy since Board::selection is modified
         if (board.move(target)) {
-            out << char(begin.x + 'a') << (begin.y + 1) << " moved to " << file << rank << '\n';
+            log << char(begin.x + 'a') << (begin.y + 1) << " moved to " << file << rank << '\n';
         } else {
-            out << "Invalid move\n";
+            log << "Invalid move\n";
         }
     } else {
         if (board.select(target)) {
-            out << "Selected " << board.get_piece(target)->get_id() << " at " << file << rank << '\n';
+            log << "Selected " << board.get_piece(target)->get_id() << " at " << file << rank << '\n';
         } else {
-            out << "Invalid selection\n";
+            log << "Invalid selection\n";
         }
     }
 }
@@ -43,8 +43,14 @@ void Terminal::output() {
         for (int x = 0; x < int(board.width()); ++x) out << "+-------";
         out << "+\n";
         //upper padding
-        for (int x = 0; x < int(board.width()); ++x) out << "|       ";
-        out << "|\n";
+        auto pad = [&]() {
+            for (int x = 0; x < int(board.width()); ++x) {
+                char highlight = board.is_valid(Vector{x, y}) ? '*' : ' ';
+                out << "| " << highlight << "   " << highlight << " ";
+            }
+            out << "|\n";
+        };
+        pad();
         //middle layer: piece id
         for (int x = 0; x < int(board.width()); ++x) {
             out << "|  ";
@@ -53,17 +59,19 @@ void Terminal::output() {
                 const Piece* ptr = board.get_piece(target);
                 out << ptr->get_id() << ':' << ptr->get_player().get_team();
             } else {
-                out << "   ";
+                out << ' ' << (board.is_valid(Vector{x, y}) ? '*' : ' ') << ' ';
             }
             out << "  ";
         }
         out << "|\n";
         //lower padding
-        for (int x = 0; x < int(board.width()); ++x) out << "|       ";
-        out << "|\n";
+        pad();
     }
     for (int x = 0; x < int(board.width()); ++x) out << "+-------";
     out << "+\n";
+    out << "mFEN = " << board.get_fen() << '\n';
+    out << log.rdbuf();
+    out.clear();
 }
 bool Terminal::is_active() {
     return active;

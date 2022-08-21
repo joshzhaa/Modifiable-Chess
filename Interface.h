@@ -5,10 +5,12 @@
 
 #include "Board.h"
 #include <iosfwd>
+#include <sstream>
 
 class Terminal {
     private:
         Board board;
+        std::stringstream log;
         std::istream& in;
         std::ostream& out;
         bool active = false;

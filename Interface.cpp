@@ -17,15 +17,15 @@ void Terminal::input() {
     int rank;
     in >> file;
     in >> rank;
-    if (!in) { //quits game if it fails to read an int
+    if (!in) { //quits game if it fails to read an int or istream is otherwise invalid
         stop();
         return;
     }
-    Vector target{file - 'a', rank};
+    Vector target{file - 'a', rank - 1};
     if (board.has_selection()) {
+        const Vector begin = board.get_selection(); //needs to be a copy since Board::selection is modified
         if (board.move(target)) {
-            const Vector& begin = board.get_selection();
-            out << char(begin.x + 'a') << begin.y << " moved to " << file << rank << '\n';
+            out << char(begin.x + 'a') << (begin.y + 1) << " moved to " << file << rank << '\n';
         } else {
             out << "Invalid move\n";
         }

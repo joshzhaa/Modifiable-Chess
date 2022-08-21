@@ -16,9 +16,7 @@ struct Move {
     Vector end;
     int team;
     char piece;
-    
-    Move(const std::string& state_in, int startx, int starty, int endx, int endy, int team_in, char piece_in) : 
-        state(state_in), start{startx, starty}, end{endx, endy}, team{team_in}, piece{piece_in} {}
+    bool capture; //whether a capture occurred on this move
 };
 
 class Piece;

@@ -28,11 +28,16 @@ void Board::set_fen(const std::string& mFEN) {
     //start is a reference, so this advances it, end can be a temporary
     auto parse_int = [](std::string::const_iterator& start, std::string::const_iterator end) {
         std::string number;
-        while (start != end && std::isdigit(*start)) {
+        while (start != end && (std::isdigit(*start) || *start == '-')) {
             number.push_back(*start++);
         }
         return std::stoi(number);
     };
+#ifdef DEBUG
+    auto debug = [](std::string::const_iterator start, std::string::const_iterator end) {
+        std::cout << std::string(start, end) << '\n';
+    };
+#endif
     //player list
     auto it = mFEN.begin();
     while(*it != ' ') {
@@ -81,7 +86,7 @@ std::string Board::get_fen() {
                 fen += "-";
             }
         }
-        fen.back() = '/';
+        fen.push_back('/');
     }
     fen.back() = ' ';
     // (3) Move status
@@ -121,8 +126,12 @@ std::string Board::get_fen() {
 }
 //Gameplay
 bool Board::select(const Vector& position) {
+    if (!in_bounds(position)) {
+        deselect();
+        return false;
+    }
     Piece* ptr = piece_array.at(position.y).at(position.x);
-    if (!in_bounds(position) || ptr->get_player().get_team() != players[turn].get_team()) {
+    if (!ptr || ptr->get_player().get_team() != players[turn].get_team()) {
         deselect();
         return false;
     }
@@ -144,13 +153,18 @@ bool Board::move(const Vector& position) {
         return false;
     }
     Piece*& target = piece_array.at(selection.y).at(selection.x);
+    int starting_occupancy = occupancy();
+    char target_id = target->get_id();
     target->move(selection, position); //hides other state-altering function calls
-    piece_array.at(position.y).at(position.x) = target;
+    piece_array.at(position.y).at(position.x) = target; //actually move piece
     target = nullptr;
-    deselect(); 
+    deselect();
+    history.push_back({get_fen(), selection, position, players[turn].get_team(), target_id, 
+        occupancy() < starting_occupancy});
+    //history.emplace_back(get_fen(), selection, position, players[turn].get_team(), target_id, 
+        //occupancy() < starting_occupancy); confused why this line doesn't work, but pragmatic concerns are more 
+        //important. (C++20 aggregrate initialization with parentheses)
     turn = (turn + 1) % players.size();
-    history.emplace_back(get_fen(), selection.x, selection.y, position.x, position.y, players[turn].get_team(), 
-        target->get_id());
     return true;
 }
 void Board::mark(const Vector& position) {
@@ -161,7 +175,7 @@ bool Board::has_selection() const noexcept {
     return selection.x != -1;
 }
 bool Board::is_occupied(const Vector& position) const {
-    return piece_array.at(position.y).at(position.x);
+    return in_bounds(position) && piece_array.at(position.y).at(position.x);
 }
 bool Board::in_bounds(const Vector& position) const noexcept {
     return position.x < int(width()) && position.y < int(height()) && position.x >= 0 && position.y >= 0;
@@ -204,8 +218,7 @@ int Board::halfmove_clock() const noexcept {
     int count = -1;
     auto it = std::find_if(history.rbegin(), history.rend(), [&](const Move& move) {
         ++count;
-        Board past(move.state, height(), width());
-        return move.piece == 'P' || past.occupancy() > occupancy();
+        return move.piece == 'P' || move.capture;
     });
     return it == history.rend() ? int(history.size()) : count;
 }

@@ -47,4 +47,8 @@ int main() {
         interface.output();
         interface.input();
     }
+#ifdef DEBUG
+    std::cout << "input record:\n";
+    interface.print_record(std::cout);
+#endif
 }

@@ -21,6 +21,9 @@ void Terminal::input() {
         stop();
         return;
     }
+#ifdef DEBUG
+    record.push_back(Input{file, rank});
+#endif
     Vector target{file - 'a', rank - 1};
     if (board.has_selection()) {
         const Vector begin = board.get_selection(); //needs to be a copy since Board::selection is modified
@@ -38,12 +41,14 @@ void Terminal::input() {
     }
 }
 void Terminal::output() {
-    for (int y = board.height() - 1; y >= 0; --y) {
+    for (int y = int(board.height()) - 1; y >= 0; --y) {
         //upper border
+        out << "       "; //left padding
         for (int x = 0; x < int(board.width()); ++x) out << "+-------";
         out << "+\n";
         //upper padding
         auto pad = [&]() {
+            out << "       "; //left padding
             for (int x = 0; x < int(board.width()); ++x) {
                 char highlight = board.is_valid(Vector{x, y}) ? '*' : ' ';
                 out << "| " << highlight << "   " << highlight << " ";
@@ -52,6 +57,7 @@ void Terminal::output() {
         };
         pad();
         //middle layer: piece id
+        out << "   " << y << "   "; //rank labels
         for (int x = 0; x < int(board.width()); ++x) {
             out << "|  ";
             Vector target{x, y};
@@ -67,8 +73,14 @@ void Terminal::output() {
         //lower padding
         pad();
     }
+    out << "       ";
     for (int x = 0; x < int(board.width()); ++x) out << "+-------";
     out << "+\n";
+    //file labels
+    out << '\n' << "       ";
+    for (int x = 0; x < int(board.width()); ++x) out << "    " << char(x + 'a') << "   ";
+    out << '\n' << '\n';
+    //information
     out << "mFEN = " << board.get_fen() << '\n';
     out << log.rdbuf();
     out.clear();
@@ -79,4 +91,10 @@ bool Terminal::is_active() {
 Board& Terminal::get_board() {
     return board;
 }
-
+#ifdef DEBUG
+void Terminal::print_record(std::ostream& out) {
+    for (auto& input : record) {
+        out << input.file << input.rank << '\n';
+    }
+}
+#endif

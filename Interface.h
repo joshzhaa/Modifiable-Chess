@@ -14,7 +14,13 @@ class Terminal {
         std::istream& in;
         std::ostream& out;
         bool active = false;
-
+#ifdef DEBUG
+        struct Input {
+            char file;
+            int rank;
+        };
+        std::vector<Input> record;
+#endif
         static constexpr char select_request[] = "Select a square or enter \"quit\"\n";
         static constexpr char move_request[] = "Input a move\n";
     public:
@@ -26,6 +32,9 @@ class Terminal {
         void output(); //output displays Board state in human viewable format
         bool is_active();
         Board& get_board();
+#ifdef DEBUG
+        void print_record(std::ostream& out);
+#endif
 };
 
 #endif //__INTERFACE_H__

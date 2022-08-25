@@ -1,0 +1,8 @@
+Notation specification for modified FEN (mFEN)
+
+This is a more general notification system meant to support more nonstandard chess variants than FEN does. It aims to
+accomodate nonstandard numbers of players, types of pieces, sizes of board, etc. The format includes the following
+sections:
+
+mFEN example for beginning of standard chess game.
+0:(0,1)1:(0,-1) R:1N:1B:1Q:1K:1B:1N:1R:1/P:1P:1P:1P:1P:1P:1P:1P:1/--------/--------/--------/--------/P:0P:0P:0P:0P:0P:0P:0P:0/R:0N:0B:0Q:0K:0B:0N:0R:0 - - 0 0 1

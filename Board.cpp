@@ -96,10 +96,10 @@ std::string Board::get_fen() {
         for (int x = 0; x < int(width()); ++x) {
             Piece* piece = piece_array.at(y).at(x);
             if (piece && !piece->unmoved()) {
-                move_fen += "(" + std::to_string(x) + "," + std::to_string(y) + "),";
+                move_fen += "(" + std::to_string(x) + "," + std::to_string(y) + ")";
             }
             if (piece && en_passantable({x, y})) {
-                passant_fen += "(" + std::to_string(x) + "," + std::to_string(y) + "),";
+                passant_fen += "(" + std::to_string(x) + "," + std::to_string(y) + ")";
             }
         }
     }
@@ -107,14 +107,14 @@ std::string Board::get_fen() {
         fen += "- ";
     } else {
         fen += move_fen;
-        fen.back() = ' ';
+        fen.push_back(' ');
     }
     // (4) En Passant attacking square
     if (passant_fen.empty()) {
         fen += "- ";
     } else {
         fen += passant_fen;
-        fen.back() = ' ';
+        fen.push_back(' ');
     }
     // (5) Current turn
     fen += std::to_string(turn) + " ";

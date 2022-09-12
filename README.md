@@ -1,4 +1,4 @@
-# Easy-Code-Chess
+# Modifiable-Chess
 Current Design Goals:
     1. rewrite code for neatness and beauty
     2. maintain modifiability for custom pieces, custom board dimensions, nonstandard players counts, alternate rule sets

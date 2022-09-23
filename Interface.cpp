@@ -57,7 +57,7 @@ void Terminal::output() {
         };
         pad();
         //middle layer: piece id
-        out << "   " << y << "   "; //rank labels
+        out << "   " << y + 1 << "   "; //rank labels
         for (int x = 0; x < int(board.width()); ++x) {
             out << "|  ";
             Vector target{x, y};

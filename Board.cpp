@@ -274,8 +274,11 @@ bool Board::en_passantable(const Vector& position) const noexcept {
     //if this pawn has been double moved in the last players.size() moves, return true, if not, false
     int target_team = get_piece(position)->get_player().get_team();
     auto start = history.rbegin();
-    auto end = start + players.size();
-    if (end >= history.rend()) end = history.rend();
+    auto end = start;
+    for (size_t i = 0; i < players.size(); ++i) { //adding iterator past end is undefined behavior
+        if (end == history.rend()) break;
+        ++end;
+    }
     auto it = std::find_if(start, end, [&](const Move& move) {
         return move.piece == 'P' && move.team == target_team && inf_norm(move.end - move.start) == 2;
     });

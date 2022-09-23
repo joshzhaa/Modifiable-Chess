@@ -5,8 +5,8 @@ PROJECTFILE = test.cpp
 SOURCES     = $(wildcard *.cpp)
 OBJECTS     = $(SOURCES:%.cpp=%.o)
 
-CXX         = g++
-CXXFLAGS = -std=c++2a -Wall -Wextra -Wconversion -pedantic
+CXX         = clang++
+CXXFLAGS = -std=c++2a -Wall -Wextra -pedantic
 
 debug: CXXFLAGS += -g3 -DDEBUG
 debug:
@@ -18,5 +18,5 @@ release:
 
 # make clean - remove .o files, executables, tarball
 clean:
-	rm -f $(EXECUTABLE) $(EXECUTABLE)_debug $(EXECUTABLE)_profile
+	rm -f $(EXECUTABLE)
 	rm -Rf *.dSYM

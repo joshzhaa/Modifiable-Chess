@@ -84,8 +84,9 @@ void Pawn::show_moves(const Vector& position) const noexcept {
     offset.y = !direction.y;
     //capture right
     auto conditional_attack = [&](const Vector& capture_pos, const Vector& passant_pos) {
-        if ((board->is_occupied(capture_pos) && player->is_opposed(board->get_piece(capture_pos)->get_player())) || 
-            (board->en_passantable(passant_pos) && player->is_opposed(board->get_piece(passant_pos)->get_player()))) {
+        bool capture = board->is_occupied(capture_pos) && player->is_opposed(board->get_piece(capture_pos)->get_player());
+        bool passant = board->en_passantable(passant_pos) && player->is_opposed(board->get_piece(passant_pos)->get_player());
+        if (can_capture || can_passant) {
             attack(capture_pos);
         }
     };
